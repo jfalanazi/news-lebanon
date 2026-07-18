@@ -15,6 +15,22 @@ services:
     networks: [nashra]
     restart: unless-stopped          # ديمومة: يعيد التشغيل تلقائيًا
 
+  # مُجدوِل المهام: يشغّل php artisan schedule:work ليطلق nashra:fetch يوميًا
+  scheduler:
+    build:
+      context: ./docker/php
+    image: nashra-app:latest
+    container_name: nashra_scheduler
+    working_dir: /var/www
+    command: php artisan schedule:work
+    volumes:
+      - ./src:/var/www
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [nashra]
+    restart: unless-stopped
+
   nginx:
     image: nginx:1.27-alpine
     container_name: nashra_nginx
