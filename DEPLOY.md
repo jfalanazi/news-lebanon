@@ -21,18 +21,16 @@
    cd news-lebanon
    ```
    (سيطلب مصادقة: استخدم توكن GitHub أو `gh auth login`.)
-3. **جهّز `.env`:** انسخ الموجود في `src/.env`، وتأكد من:
-   - `APP_ENV=production` و`APP_DEBUG=false`
-   - `APP_URL=https://nashra.ijaber.com`
-   - `DB_HOST=mysql` `DB_DATABASE=nashra` (كما هو)
-4. **أول تشغيل:**
+3. **شغّل النشر (يهيّئ كل شي تلقائيًا):**
    ```
-   docker compose up -d --build
-   docker compose exec app php artisan migrate --force
-   docker compose exec app php artisan storage:link
-   docker compose exec app php artisan optimize:clear
-   docker compose exec app php artisan make:filament-user   # أنشئ مستخدم اللوحة
+   ./deploy.sh
    ```
+   يبني الحاويات، ينشئ `src/.env` من `src/.env.docker`، يركّب `composer install`، يولّد المفتاح، يرحّل قاعدة البيانات، ويربط التخزين.
+4. **أنشئ مستخدم اللوحة (أول مرة فقط):**
+   ```
+   docker compose exec app php artisan make:filament-user
+   ```
+5. **للإنتاج:** في `src/.env` عدّل `APP_ENV=production` و`APP_DEBUG=false` و`APP_URL=https://nashra.ijaber.com`، ثم `docker compose exec app php artisan optimize:clear`.
 
 ---
 
