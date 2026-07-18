@@ -25,7 +25,7 @@
   .h-sub{font-weight:500;font-size:22px;color:#CFE3D2;margin-top:8px}
   .h-chain{margin-top:12px}
   .h-left{text-align:left}
-  .h-issue{font-weight:700;font-size:19px;color:var(--goldSoft);let-spacing:1px}
+  .h-issue{font-weight:700;font-size:19px;color:var(--goldSoft);letter-spacing:1px}
   .h-day{font-family:var(--display);font-weight:900;font-size:40px;color:#fff;margin-top:10px;line-height:1}
   .h-greg{font-weight:600;font-size:24px;color:#EAF3EC;margin-top:8px}
   .h-hijri{font-weight:400;font-size:19px;color:#A9C6B0;margin-top:5px}
