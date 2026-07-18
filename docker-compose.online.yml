@@ -1,0 +1,15 @@
+# طبقة النشر أونلاين عبر Cloudflare Tunnel — رابط HTTPS عام ثابت بلا فتح منافذ.
+# الاستخدام على السيرفر:
+#   docker compose -f docker-compose.yml -f docker-compose.online.yml up -d
+# المتطلب: ضع CLOUDFLARE_TUNNEL_TOKEN في ملف .env بجذر المشروع (من لوحة Cloudflare Zero Trust).
+# في لوحة Cloudflare: Public Hostname → Service = http://nginx:80
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: nashra_tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on: [nginx]
+    networks: [nashra]
+    restart: unless-stopped
