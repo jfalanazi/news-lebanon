@@ -3,6 +3,8 @@ nashra-phase*/
 p3cfix/
 .DS_Store
 **/.DS_Store
+.env
+.env.online
 src/vendor/
 src/node_modules/
 src/storage/app/newsletters/
