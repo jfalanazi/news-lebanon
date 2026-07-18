@@ -43,8 +43,8 @@ class NewsletterRenderer
         ])->take(3)->values()->all();
 
         // الطقس والصلاة: من لقطة العدد إن وُجدت، وإلا نجلبها الآن
-        $weather = $edition->weather ?: $this->fetchWeather();
-        $prayers = $edition->prayers ?: $this->fetchPrayers();
+        $weather = $this->validWeather($edition->weather) ? $edition->weather : $this->fetchWeather();
+        $prayers = $this->validPrayers($edition->prayers) ? $edition->prayers : $this->fetchPrayers();
 
         $qrUrl = $edition->caption_link
             ? 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' . urlencode($edition->caption_link)
@@ -87,6 +87,16 @@ class NewsletterRenderer
             ->save($path);
 
         return $path;
+    }
+
+    private function validWeather($w): bool
+    {
+        return is_array($w) && isset($w["icon"], $w["cond"], $w["hi"], $w["lo"], $w["now"]) && isset($w["days"]) && is_array($w["days"]);
+    }
+
+    private function validPrayers($p): bool
+    {
+        return is_array($p) && isset($p["الفجر"], $p["الظهر"], $p["المغرب"]);
     }
 
     private function eventRange(?string $start, ?string $end): string
