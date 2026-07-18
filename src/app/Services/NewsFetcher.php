@@ -88,7 +88,7 @@ class NewsFetcher
                 'url'         => $it['link'],
                 'source_name' => $srcName,
                 'title'       => Str::limit($title, 200, ''),
-                'excerpt'     => $it['desc'] ? Str::limit($it['desc'], 200) : null,
+                'excerpt'     => $it['desc'] ? Str::limit(html_entity_decode($it['desc']), 200) : null,
                 'used'        => false,
             ]);
             $added++;
