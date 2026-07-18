@@ -10,7 +10,7 @@
     --gold:#9C8654; --goldSoft:#C9B47E; --saffron:#C1A45C; --red:#A8342B;
     --text:#20302A; --mut:#66705F; --line:#E3DAC4; --block:#F9F5EA; --item:#FDFBF3;
     --display:"Al-Awwal","Tajawal","IBM Plex Sans Arabic",sans-serif;
-    --body:"IBM Plex Sans Arabic","Tajawal",sans-serif;
+    --body:"Al-Awwal","IBM Plex Sans Arabic",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--paper);font-family:var(--body);color:var(--text)}
