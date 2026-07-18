@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
+use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
@@ -16,6 +18,66 @@ class EditEdition extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            // نشر كامل: توليد الصورة + نص واتساب قابل للنسخ + تعليم العدد كمنشور
+            Action::make('publish')
+                ->label('نشر ومشاركة')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('primary')
+                ->modalHeading('نشر النشرة ومشاركتها')
+                ->modalDescription('سيتم توليد صورة النشرة وتجهيز نص واتساب جاهز للنسخ، وتعليم العدد كمنشور.')
+                ->modalSubmitActionLabel('توليد ونشر')
+                ->fillForm(function () {
+                    $edition = $this->record->load(['news', 'recommendations', 'events']);
+
+                    return [
+                        'caption' => $edition->news->isEmpty()
+                            ? 'أضف خبرًا واحدًا على الأقل قبل النشر.'
+                            : app(NewsletterCaption::class)->build($edition),
+                    ];
+                })
+                ->form([
+                    Textarea::make('caption')
+                        ->label('نص المشاركة (واتساب) — انسخه')
+                        ->rows(14)
+                        ->readOnly()
+                        ->extraInputAttributes(['style' => 'direction:rtl;line-height:1.9']),
+                ])
+                ->action(function () {
+                    $edition = $this->record->load(['news', 'recommendations', 'events']);
+
+                    if ($edition->news->isEmpty()) {
+                        Notification::make()
+                            ->title('لا توجد أخبار في هذا العدد')
+                            ->body('أضف خبرًا واحدًا على الأقل قبل النشر.')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+
+                    app(NewsletterRenderer::class)->render($edition);
+
+                    $edition->update([
+                        'status'       => 'published',
+                        'published_at' => now(),
+                    ]);
+
+                    $url = '/storage/newsletters/edition-' . $edition->issue_number . '.png';
+
+                    Notification::make()
+                        ->title('تم النشر بنجاح')
+                        ->body('الصورة جاهزة ونص المشاركة مُعبّأ في الحقل أعلاه.')
+                        ->success()
+                        ->actions([
+                            Action::make('open')
+                                ->label('فتح الصورة')
+                                ->url($url, shouldOpenInNewTab: true),
+                        ])
+                        ->persistent()
+                        ->send();
+                }),
+
+            // توليد الصورة فقط (بدون تغيير الحالة)
             Action::make('generate')
                 ->label('توليد الصورة')
                 ->icon('heroicon-o-photo')
@@ -47,6 +109,7 @@ class EditEdition extends EditRecord
                         ->persistent()
                         ->send();
                 }),
+
             DeleteAction::make(),
         ];
     }

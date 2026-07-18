@@ -53,10 +53,10 @@
     display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:27px;color:var(--cedar)}
   .news-body{flex:1;padding-top:2px}
   .news-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  .news-cat{font-weight:700;font-size:20px;color:var(--gold)}
+  .news-cat{font-weight:700;font-size:20px;color:var(--gold);overflow-wrap:anywhere}
   .news-badge{font-family:var(--display);font-weight:800;font-size:17px;color:#fff;padding:3px 12px;border-radius:6px}
-  .news-title{font-weight:700;font-size:34px;line-height:1.25;color:var(--text)}
-  .news-excerpt{font-weight:400;font-size:24px;line-height:1.4;color:var(--mut);margin-top:6px}
+  .news-title{font-weight:700;font-size:34px;line-height:1.25;color:var(--text);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .news-excerpt{font-weight:400;font-size:24px;line-height:1.4;color:var(--mut);margin-top:6px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
   .news-item.m:before,.news-item.b:before{content:"";position:absolute;top:6px;bottom:8px;right:-2px;width:5px;border-radius:3px}
   .news-item.b{background:rgba(168,52,43,.05)} .news-item.b:before{background:var(--red)}
@@ -109,7 +109,7 @@
   .card .cicon{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:#E4EDE2;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center}
   .card .cbody{flex:1}
   .card .clabel{font-weight:700;font-size:16px;color:var(--cedar)}
-  .card .cname{font-family:var(--display);font-weight:800;font-size:22px;color:var(--cedarDeep);margin-top:3px;line-height:1.25}
+  .card .cname{font-family:var(--display);font-weight:800;font-size:22px;color:var(--cedarDeep);margin-top:3px;line-height:1.25;overflow-wrap:anywhere}
   .card .cbadge{display:inline-block;margin-top:8px;font-weight:700;font-size:16px;padding:3px 14px;border-radius:13px}
   .cbadge.area{background:#EBE2C9;color:var(--cedarDeep)}
   .cbadge.date{background:var(--saffron);color:#33290F}
