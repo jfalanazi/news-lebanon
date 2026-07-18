@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800;900&display=swap');
+  @include('_fonts')
 
   :root{
     --ink:#0D5A33; --ink2:#11713F; --paper:#F4F0E5; --cedar:#146B3F; --cedarDeep:#0E5230;
     --gold:#9C8654; --goldSoft:#C9B47E; --saffron:#C1A45C; --red:#A8342B;
     --text:#20302A; --mut:#66705F; --line:#E3DAC4; --block:#F9F5EA; --item:#FDFBF3;
-    --display:"Tajawal","IBM Plex Sans Arabic",sans-serif;
+    --display:"Al-Awwal","Tajawal","IBM Plex Sans Arabic",sans-serif;
     --body:"IBM Plex Sans Arabic","Tajawal",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
