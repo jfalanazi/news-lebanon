@@ -34,6 +34,10 @@ docker compose exec -T app php artisan storage:link || true
 docker compose exec -T app php artisan filament:assets || true
 docker compose exec -T app php artisan optimize:clear
 
+# المُجدوِل بدأ قبل توفّر vendor؛ نعيد تشغيله بعد اكتمال التهيئة
+echo "→ إعادة تشغيل المُجدوِل…"
+docker compose restart scheduler || true
+
 echo "→ (6/6) الحالة:"
 docker compose ps
 
