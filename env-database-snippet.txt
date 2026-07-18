@@ -1,0 +1,9 @@
+# ألصق هذه القيم في ملف src/.env (بديلًا عن سطور DB_ الافتراضية)
+# اسم الخدمة "mysql" هو المضيف داخل شبكة Docker.
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=nashra
+DB_USERNAME=nashra
+DB_PASSWORD=secret
