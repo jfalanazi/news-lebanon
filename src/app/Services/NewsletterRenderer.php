@@ -71,7 +71,7 @@ class NewsletterRenderer
         $data = $this->buildData($edition);
         $html = View::make('newsletter', $data)->render();
 
-        $dir = storage_path('app/newsletters');
+        $dir = storage_path('app/public/newsletters');
         if (! is_dir($dir)) {
             mkdir($dir, 0775, true);
         }
