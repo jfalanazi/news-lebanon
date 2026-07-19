@@ -79,18 +79,24 @@ class EventsRelationManager extends RelationManager
                             return;
                         }
 
+                        $today = now()->toDateString();
+                        // نقبل التواريخ الصحيحة المستقبلية فقط، وإلا نتركها فارغة
+                        $futureDate = fn ($v) => is_string($v)
+                            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)
+                            && $v >= $today
+                            ? $v : null;
+
                         $pos = (int) $edition->events()->max('position');
                         $added = 0;
                         foreach ($rows as $r) {
                             if (empty($r['title'])) {
                                 continue;
                             }
-                            $isDate = fn ($v) => is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v);
                             $edition->events()->create([
                                 'title'      => $r['title'],
                                 'category'   => in_array($r['category'] ?? '', ['ثقافي', 'سياحي', 'فني', 'رياضي'], true) ? $r['category'] : 'ثقافي',
-                                'start_date' => $isDate($r['start'] ?? null) ? $r['start'] : null,
-                                'end_date'   => $isDate($r['end'] ?? null) ? $r['end'] : null,
+                                'start_date' => $futureDate($r['start'] ?? null),
+                                'end_date'   => $futureDate($r['end'] ?? null),
                                 'position'   => ++$pos,
                             ]);
                             $added++;
