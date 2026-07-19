@@ -7,6 +7,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -40,39 +41,45 @@ class EditionForm
                         ])->render());
                     }),
 
-                TextInput::make('issue_number')
-                    ->label('رقم العدد')
-                    ->required()
-                    ->numeric()
-                    ->default(fn () => Edition::nextIssueNumber())
-                    ->unique(ignoreRecord: true)
-                    ->validationMessages([
-                        'unique' => 'رقم العدد مستخدم مسبقًا — اختر رقمًا آخر.',
-                    ])
-                    ->helperText('يُملأ تلقائيًا؛ يمكنك تعديله يدويًا.'),
-                DatePicker::make('edition_date')
-                    ->label('تاريخ العدد')
-                    ->required()
-                    ->default(now())
-                    ->unique(ignoreRecord: true)
-                    ->validationMessages([
-                        'unique' => 'يوجد عدد لهذا التاريخ مسبقًا — لا يمكن إنشاء عددين لنفس اليوم.',
+                // بيانات العدد — مضغوطة في قسم قابل للطي (تُملأ تلقائيًا غالبًا)
+                Section::make('بيانات العدد')
+                    ->description('تُملأ تلقائيًا — عدّلها فقط عند الحاجة.')
+                    ->collapsible()
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('issue_number')
+                            ->label('رقم العدد')
+                            ->required()
+                            ->numeric()
+                            ->default(fn () => Edition::nextIssueNumber())
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'رقم العدد مستخدم مسبقًا — اختر رقمًا آخر.',
+                            ]),
+                        DatePicker::make('edition_date')
+                            ->label('تاريخ العدد')
+                            ->required()
+                            ->default(now())
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'يوجد عدد لهذا التاريخ مسبقًا — لا يمكن إنشاء عددين لنفس اليوم.',
+                            ]),
+                        Select::make('status')
+                            ->label('الحالة')
+                            ->options([
+                                'draft' => 'مسودة',
+                                'published' => 'منشور',
+                            ])
+                            ->default('draft')
+                            ->required(),
+                        TextInput::make('quote')
+                            ->label('عبارة التذييل')
+                            ->columnSpanFull(),
+                        TextInput::make('caption_link')
+                            ->label('رابط التعليق / QR')
+                            ->url()
+                            ->columnSpanFull(),
                     ]),
-                Select::make('status')
-                    ->label('الحالة')
-                    ->options([
-                        'draft' => 'مسودة',
-                        'published' => 'منشور',
-                    ])
-                    ->default('draft')
-                    ->required(),
-                TextInput::make('quote')
-                    ->label('عبارة التذييل')
-                    ->columnSpanFull(),
-                TextInput::make('caption_link')
-                    ->label('رابط التعليق / QR')
-                    ->url()
-                    ->columnSpanFull(),
             ]);
     }
 }

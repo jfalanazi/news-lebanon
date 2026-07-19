@@ -14,9 +14,9 @@
                 ↻ تحديث المعاينة
             </button>
         </div>
-        <div style="width:432px;max-width:100%;height:600px;overflow:hidden;border:1px solid #E3DAC4;border-radius:12px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.08)">
+        <div style="width:346px;max-width:100%;height:480px;overflow:hidden;border:1px solid #E3DAC4;border-radius:12px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.08)">
             <iframe id="nashra-live-{{ $editionId }}" src="{{ $liveUrl }}" loading="lazy"
-                style="width:1080px;height:1500px;border:0;transform:scale(0.4);transform-origin:top right"></iframe>
+                style="width:1080px;height:1500px;border:0;transform:scale(0.32);transform-origin:top right"></iframe>
         </div>
         <div style="font-size:12px;color:#66705F">تعرض حالة العدد الآن. عدّل الأخبار أو التوصيات ثم اضغط «تحديث المعاينة».</div>
     </div>
