@@ -21,28 +21,22 @@
         <div style="font-size:12px;color:#66705F">تعرض حالة العدد الآن. عدّل الأخبار أو التوصيات ثم اضغط «تحديث المعاينة».</div>
     </div>
 
-    {{-- قسم الصورة النهائية: يظهر بعد التوليد --}}
+    {{-- الصورة النهائية (PNG): أزرار فقط بدون تكرار عرض الصورة --}}
     @if ($hasImage)
-        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;border-top:1px solid #E3DAC4;padding-top:14px">
-            <a href="{{ $imgUrl }}" target="_blank" style="flex:0 0 auto">
-                <img src="{{ $imgUrl }}" alt="صورة النشرة"
-                     style="width:180px;border-radius:12px;border:1px solid #E3DAC4;box-shadow:0 6px 20px rgba(0,0,0,.10)">
-            </a>
-            <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:10px">
-                <div style="font-weight:700;color:#146B3F">الصورة النهائية جاهزة (PNG)</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap">
-                    <a href="{{ $imgUrl }}" download="نشرة-لبنان-{{ $issue }}.png"
-                       style="display:inline-flex;align-items:center;gap:6px;background:#146B3F;color:#fff;padding:9px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
-                        ⬇ تحميل الصورة
-                    </a>
-                    <a href="{{ $imgUrl }}" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:6px;background:#EFEADF;color:#20302A;padding:9px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
-                        ↗ فتح في تبويب
-                    </a>
-                </div>
-                <div style="font-size:12px;color:#66705F;line-height:1.7">
-                    للنشر في واتساب: حمّل الصورة، أرفقها <b>كـ«مستند»</b> (لتفادي الضغط)، ثم الصق التعليق أدناه.
-                </div>
+        <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid #E3DAC4;padding-top:14px">
+            <div style="font-weight:700;color:#146B3F">الصورة النهائية (PNG) — للطباعة والمشاركة</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <a href="{{ $imgUrl }}" download="نشرة-لبنان-{{ $issue }}.png"
+                   style="display:inline-flex;align-items:center;gap:6px;background:#146B3F;color:#fff;padding:9px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+                    ⬇ تحميل الصورة
+                </a>
+                <a href="{{ $imgUrl }}" target="_blank"
+                   style="display:inline-flex;align-items:center;gap:6px;background:#EFEADF;color:#20302A;padding:9px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+                    ↗ فتح في تبويب
+                </a>
+            </div>
+            <div style="font-size:12px;color:#66705F;line-height:1.7">
+                للنشر في واتساب: حمّل الصورة، أرفقها <b>كـ«مستند»</b> (لتفادي الضغط)، ثم الصق التعليق أدناه.
             </div>
         </div>
 
