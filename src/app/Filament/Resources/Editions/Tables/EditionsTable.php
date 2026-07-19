@@ -22,14 +22,8 @@ class EditionsTable
                 TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'published' => 'منشور', 'approved' => 'معتمد',
-                        'in_review' => 'قيد المراجعة', default => 'مسودة',
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'published' => 'success', 'approved' => 'info',
-                        'in_review' => 'warning', default => 'gray',
-                    }),
+                    ->formatStateUsing(fn (?string $state): string => $state === 'published' ? 'منشور' : 'مسودة')
+                    ->color(fn (?string $state): string => $state === 'published' ? 'success' : 'gray'),
                 TextColumn::make('news_count')
                     ->label('عدد الأخبار')
                     ->counts('news'),

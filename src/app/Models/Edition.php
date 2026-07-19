@@ -33,12 +33,14 @@ class Edition extends Model
         return $this->hasMany(Event::class)->orderBy('position');
     }
 
-    // رقم العدد التلقائي بناءً على مرساة في الإعدادات
+    // رقم العدد التلقائي = رقم آخر عدد منشور + 1 (أو الأعلى المتاح)
     public static function nextIssueNumber(): int
     {
-        $anchorNum  = (int) (Setting::get('issue_anchor_number', 1));
-        $anchorDate = Setting::get('issue_anchor_date', '2026-01-01');
-        $days = now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($anchorDate)->startOfDay(), false);
-        return $anchorNum + max(0, $days);
+        $lastPublished = (int) static::where('status', 'published')->max('issue_number');
+        if ($lastPublished > 0) {
+            return $lastPublished + 1;
+        }
+        $maxAny = (int) static::max('issue_number');
+        return $maxAny > 0 ? $maxAny + 1 : 1;
     }
 }

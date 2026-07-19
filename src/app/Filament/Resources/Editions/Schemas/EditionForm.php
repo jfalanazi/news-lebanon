@@ -62,8 +62,6 @@ class EditionForm
                     ->label('الحالة')
                     ->options([
                         'draft' => 'مسودة',
-                        'in_review' => 'قيد المراجعة',
-                        'approved' => 'معتمد',
                         'published' => 'منشور',
                     ])
                     ->default('draft')

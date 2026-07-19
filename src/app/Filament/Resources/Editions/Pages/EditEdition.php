@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
+use App\Models\NewsCandidate;
+use App\Models\NewsItem;
+use App\Services\AiNewsCurator;
 use App\Services\NewsFetcher;
 use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
@@ -19,29 +22,73 @@ class EditEdition extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // سحب أخبار اليوم من مصادر RSS إلى المجموعة المرشّحة
-            Action::make('fetch')
-                ->label('اسحب أخبار اليوم')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
+            // توليد وتعبئة ذكية: سحب + تنظيف بالذكاء + إضافة أفضل الأخبار لهذا العدد بضغطة
+            Action::make('autofill')
+                ->label('توليد وتعبئة ذكية')
+                ->icon('heroicon-o-sparkles')
+                ->color('primary')
+                ->requiresConfirmation()
+                ->modalHeading('توليد وتعبئة العدد')
+                ->modalDescription('سيسحب أخبار اليوم من مصادرك، ينظّفها ويصنّفها بالذكاء، ثم يضيف أفضل 7 أخبار لهذا العدد.')
+                ->modalSubmitActionLabel('ابدأ')
                 ->action(function () {
-                    $report = app(NewsFetcher::class)->fetchAll();
+                    $edition = $this->record;
 
-                    if (empty($report)) {
+                    app(NewsFetcher::class)->fetchAll();
+
+                    $batch = NewsCandidate::where('used', false)
+                        ->where('ai_processed', false)
+                        ->latest()->take(10)->get();
+
+                    if ($batch->isNotEmpty()) {
+                        try {
+                            app(AiNewsCurator::class)->process($batch);
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('تعذّر التوليد الذكي')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->persistent()
+                                ->send();
+
+                            return;
+                        }
+                    }
+
+                    $toAdd = NewsCandidate::where('used', false)
+                        ->where('ai_processed', true)
+                        ->latest()->take(7)->get();
+
+                    if ($toAdd->isEmpty()) {
                         Notification::make()
-                            ->title('لا توجد مصادر مفعّلة')
-                            ->body('أضف روابط RSS وفعّلها من شاشة «المصادر».')
+                            ->title('لا توجد أخبار جديدة')
+                            ->body('كل الأخبار مستخدمة، أو لا توجد مصادر RSS مفعّلة.')
                             ->warning()
                             ->send();
 
                         return;
                     }
 
-                    $total = collect($report)->filter(fn ($v) => is_int($v))->sum();
+                    $pos = (int) NewsItem::where('edition_id', $edition->id)->max('position');
+                    $added = 0;
+                    foreach ($toAdd as $c) {
+                        NewsItem::create([
+                            'edition_id'  => $edition->id,
+                            'category'    => $c->category,
+                            'url'         => $c->url,
+                            'source_name' => $c->source_name,
+                            'title'       => $c->title,
+                            'excerpt'     => $c->excerpt,
+                            'priority'    => $c->priority ?: 'normal',
+                            'position'    => ++$pos,
+                        ]);
+                        $c->update(['used' => true]);
+                        $added++;
+                    }
 
                     Notification::make()
-                        ->title('تم سحب الأخبار')
-                        ->body("أُضيف {$total} خبرًا إلى «الأخبار المرشّحة» — راجعها وأضف المناسب للعدد.")
+                        ->title('تمت التعبئة الذكية')
+                        ->body("أُضيف {$added} خبرًا لهذا العدد. اضغط «↻ تحديث المعاينة» لرؤية النتيجة.")
                         ->success()
                         ->send();
                 }),
