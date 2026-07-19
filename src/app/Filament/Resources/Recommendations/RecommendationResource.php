@@ -16,6 +16,9 @@ use Filament\Tables\Table;
 class RecommendationResource extends Resource
 {
     protected static ?string $model = Recommendation::class;
+
+    // تُدار التوصيات داخل صفحة العدد — نخفيها من القائمة الجانبية
+    protected static bool $shouldRegisterNavigation = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
     protected static ?string $recordTitleAttribute = 'name';
     protected static ?string $navigationLabel = 'التوصيات';

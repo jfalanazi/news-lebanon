@@ -21,22 +21,22 @@ class EditionForm
                     ->columnSpanFull()
                     ->content(function ($record) {
                         if (! $record) {
-                            return new HtmlString('<div style="color:#66705F;font-size:13px">ستظهر المعاينة هنا بعد الضغط على «توليد الصورة».</div>');
+                            return new HtmlString('<div style="color:#66705F;font-size:13px">احفظ العدد أولًا لتظهر المعاينة الحيّة.</div>');
                         }
                         $path = storage_path('app/public/newsletters/edition-' . $record->issue_number . '.png');
-                        if (! file_exists($path)) {
-                            return new HtmlString('<div style="color:#66705F;font-size:13px">لم تُولّد صورة لهذا العدد بعد. اضغط «توليد الصورة» أعلى الصفحة.</div>');
-                        }
-                        $ts = filemtime($path);
+                        $hasImage = file_exists($path);
+                        $ts = $hasImage ? filemtime($path) : 0;
                         $date = Carbon::parse($record->edition_date);
                         $caption = "🗞️ نشرة لبنان — العدد {$record->issue_number}\n"
                             . $date->translatedFormat('l') . ' · ' . $date->format('Y/m/d')
                             . ($record->caption_link ? "\n🔗 " . $record->caption_link : '');
 
                         return new HtmlString(view('filament.edition-preview', [
-                            'issue'   => $record->issue_number,
-                            'ts'      => $ts,
-                            'caption' => $caption,
+                            'editionId' => $record->id,
+                            'issue'     => $record->issue_number,
+                            'ts'        => $ts,
+                            'caption'   => $caption,
+                            'hasImage'  => $hasImage,
                         ])->render());
                     }),
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
+use App\Services\NewsFetcher;
 use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
 use Filament\Actions\Action;
@@ -18,6 +19,33 @@ class EditEdition extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            // سحب أخبار اليوم من مصادر RSS إلى المجموعة المرشّحة
+            Action::make('fetch')
+                ->label('اسحب أخبار اليوم')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(function () {
+                    $report = app(NewsFetcher::class)->fetchAll();
+
+                    if (empty($report)) {
+                        Notification::make()
+                            ->title('لا توجد مصادر مفعّلة')
+                            ->body('أضف روابط RSS وفعّلها من شاشة «المصادر».')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+
+                    $total = collect($report)->filter(fn ($v) => is_int($v))->sum();
+
+                    Notification::make()
+                        ->title('تم سحب الأخبار')
+                        ->body("أُضيف {$total} خبرًا إلى «الأخبار المرشّحة» — راجعها وأضف المناسب للعدد.")
+                        ->success()
+                        ->send();
+                }),
+
             // نشر كامل: توليد الصورة + نص واتساب قابل للنسخ + تعليم العدد كمنشور
             Action::make('publish')
                 ->label('نشر ومشاركة')

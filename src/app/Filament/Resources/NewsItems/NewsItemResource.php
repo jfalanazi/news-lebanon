@@ -16,6 +16,9 @@ use Filament\Tables\Table;
 class NewsItemResource extends Resource
 {
     protected static ?string $model = NewsItem::class;
+
+    // تُدار الأخبار داخل صفحة العدد — نخفيها من القائمة الجانبية
+    protected static bool $shouldRegisterNavigation = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
     protected static ?string $recordTitleAttribute = 'title';
     protected static ?string $navigationLabel = 'الأخبار';
