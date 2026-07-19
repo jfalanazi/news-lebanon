@@ -23,5 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
 
+# مكتبة Puppeteer عالميًا — يقودها Browsershot لتشغيل Chromium (يجدها عبر NODE_PATH=npm root -g)
+RUN npm install -g puppeteer
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
