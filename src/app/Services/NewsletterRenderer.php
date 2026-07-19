@@ -28,7 +28,7 @@ class NewsletterRenderer
             'title'       => $n->title,
             'excerpt'     => $n->excerpt,
             'priority'    => $n->priority,
-        ])->take(10)->values()->all();
+        ])->take(6)->values()->all();
 
         $recos = $edition->recommendations->map(fn ($r) => [
             'type' => $r->type,
