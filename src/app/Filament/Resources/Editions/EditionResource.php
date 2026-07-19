@@ -30,7 +30,11 @@ class EditionResource extends Resource
     }
     public static function getRelations(): array
     {
-        return [];
+        return [
+            RelationManagers\NewsRelationManager::class,
+            RelationManagers\RecommendationsRelationManager::class,
+            RelationManagers\EventsRelationManager::class,
+        ];
     }
     public static function getPages(): array
     {
