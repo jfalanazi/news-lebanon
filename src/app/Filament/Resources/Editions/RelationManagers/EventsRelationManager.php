@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Editions\RelationManagers;
 
+use App\Services\AiSuggester;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -60,6 +63,42 @@ class EventsRelationManager extends RelationManager
                     ->date(),
             ])
             ->headerActions([
+                Action::make('aiSuggest')
+                    ->label('اقتراح ذكي')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('primary')
+                    ->action(function () {
+                        $edition = $this->getOwnerRecord();
+
+                        try {
+                            $rows = app(AiSuggester::class)->events(3);
+                        } catch (\Throwable $e) {
+                            Notification::make()->title('تعذّر الاقتراح الذكي')
+                                ->body($e->getMessage())->danger()->persistent()->send();
+
+                            return;
+                        }
+
+                        $pos = (int) $edition->events()->max('position');
+                        $added = 0;
+                        foreach ($rows as $r) {
+                            if (empty($r['title'])) {
+                                continue;
+                            }
+                            $isDate = fn ($v) => is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v);
+                            $edition->events()->create([
+                                'title'      => $r['title'],
+                                'category'   => in_array($r['category'] ?? '', ['ثقافي', 'سياحي', 'فني', 'رياضي'], true) ? $r['category'] : 'ثقافي',
+                                'start_date' => $isDate($r['start'] ?? null) ? $r['start'] : null,
+                                'end_date'   => $isDate($r['end'] ?? null) ? $r['end'] : null,
+                                'position'   => ++$pos,
+                            ]);
+                            $added++;
+                        }
+
+                        Notification::make()->title("أُضيف {$added} فعالية بالذكاء")
+                            ->body('راجِع التواريخ — قد تحتاج تدقيقًا.')->success()->send();
+                    }),
                 CreateAction::make()->label('إضافة فعالية'),
             ])
             ->recordActions([

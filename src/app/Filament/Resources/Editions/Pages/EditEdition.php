@@ -3,10 +3,6 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
-use App\Models\NewsCandidate;
-use App\Models\NewsItem;
-use App\Services\AiNewsCurator;
-use App\Services\NewsFetcher;
 use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
 use Filament\Actions\Action;
@@ -22,77 +18,6 @@ class EditEdition extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // توليد وتعبئة ذكية: سحب + تنظيف بالذكاء + إضافة أفضل الأخبار لهذا العدد بضغطة
-            Action::make('autofill')
-                ->label('توليد وتعبئة ذكية')
-                ->icon('heroicon-o-sparkles')
-                ->color('primary')
-                ->requiresConfirmation()
-                ->modalHeading('توليد وتعبئة العدد')
-                ->modalDescription('سيسحب أخبار اليوم من مصادرك، ينظّفها ويصنّفها بالذكاء، ثم يضيف أفضل 7 أخبار لهذا العدد.')
-                ->modalSubmitActionLabel('ابدأ')
-                ->action(function () {
-                    $edition = $this->record;
-
-                    app(NewsFetcher::class)->fetchAll();
-
-                    $batch = NewsCandidate::where('used', false)
-                        ->where('ai_processed', false)
-                        ->latest()->take(10)->get();
-
-                    if ($batch->isNotEmpty()) {
-                        try {
-                            app(AiNewsCurator::class)->process($batch);
-                        } catch (\Throwable $e) {
-                            Notification::make()
-                                ->title('تعذّر التوليد الذكي')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->persistent()
-                                ->send();
-
-                            return;
-                        }
-                    }
-
-                    $toAdd = NewsCandidate::where('used', false)
-                        ->where('ai_processed', true)
-                        ->latest()->take(7)->get();
-
-                    if ($toAdd->isEmpty()) {
-                        Notification::make()
-                            ->title('لا توجد أخبار جديدة')
-                            ->body('كل الأخبار مستخدمة، أو لا توجد مصادر RSS مفعّلة.')
-                            ->warning()
-                            ->send();
-
-                        return;
-                    }
-
-                    $pos = (int) NewsItem::where('edition_id', $edition->id)->max('position');
-                    $added = 0;
-                    foreach ($toAdd as $c) {
-                        NewsItem::create([
-                            'edition_id'  => $edition->id,
-                            'category'    => $c->category,
-                            'url'         => $c->url,
-                            'source_name' => $c->source_name,
-                            'title'       => $c->title,
-                            'excerpt'     => $c->excerpt,
-                            'priority'    => $c->priority ?: 'normal',
-                            'position'    => ++$pos,
-                        ]);
-                        $c->update(['used' => true]);
-                        $added++;
-                    }
-
-                    Notification::make()
-                        ->title('تمت التعبئة الذكية')
-                        ->body("أُضيف {$added} خبرًا لهذا العدد. اضغط «↻ تحديث المعاينة» لرؤية النتيجة.")
-                        ->success()
-                        ->send();
-                }),
-
             // نشر كامل: توليد الصورة + نص واتساب قابل للنسخ + تعليم العدد كمنشور
             Action::make('publish')
                 ->label('نشر ومشاركة')
