@@ -7,9 +7,12 @@ use App\Services\AiNewsCurator;
 use App\Services\AiSuggester;
 use App\Services\NewsFetcher;
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -33,29 +36,59 @@ class NewsRelationManager extends RelationManager
                 ->label('العنوان')
                 ->required()
                 ->columnSpanFull(),
-            Textarea::make('excerpt')
-                ->label('النبذة (مختصر — يُفضّل توليده)')
-                ->rows(2)
-                ->maxLength(500)
-                ->helperText('سطر مختصر يظهر في النشرة. استخدم زر «نبذة ذكية» في الجدول لتوليده من المحتوى.')
-                ->columnSpanFull(),
+
+            // محتوى الخبر الكامل — أساس الإدخال اليدوي
             Textarea::make('body')
-                ->label('المحتوى الكامل (اختياري)')
+                ->label('محتوى الخبر')
                 ->rows(6)
                 ->helperText('النص الكامل للخبر — يظهر في صفحة العدد لمن يريد التفاصيل.')
                 ->columnSpanFull(),
+
+            // النبذة أسفل المحتوى، وبجانبها زر توليد يلخّص من المحتوى
+            Textarea::make('excerpt')
+                ->label('النبذة (سطر مختصر يظهر في النشرة)')
+                ->rows(2)
+                ->maxLength(500)
+                ->hintAction(
+                    FormAction::make('summarize')
+                        ->label('✨ توليد من المحتوى')
+                        ->action(function ($get, $set) {
+                            $body = trim((string) $get('body'));
+                            if ($body === '') {
+                                Notification::make()
+                                    ->title('أضف «محتوى الخبر» أولًا')
+                                    ->body('التلخيص الذكي يحتاج نص الخبر ليختصر منه.')
+                                    ->warning()->send();
+
+                                return;
+                            }
+
+                            try {
+                                $summary = app(AiSuggester::class)->summarize((string) $get('title'), $body);
+                                if ($summary !== '') {
+                                    $set('excerpt', $summary);
+                                }
+                            } catch (\Throwable $e) {
+                                Notification::make()->title('تعذّر التوليد')
+                                    ->body($e->getMessage())->danger()->send();
+                            }
+                        })
+                )
+                ->columnSpanFull(),
+
             Select::make('priority')
                 ->label('الأولوية')
                 ->options(['normal' => 'عادي', 'important' => 'مهم', 'breaking' => 'عاجل'])
                 ->default('normal')
                 ->required(),
+
             TextInput::make('url')
-                ->label('رابط الخبر (اختياري)')
-                ->url()
-                ->helperText('يُشتق منه اسم المصدر تلقائيًا')
+                ->label('رابط الخبر')
+                ->helperText('اختياري — يُشتق منه اسم المصدر تلقائيًا.')
                 ->columnSpanFull(),
+
             TextInput::make('category')
-                ->label('التصنيف (اختياري)'),
+                ->label('التصنيف'),
         ]);
     }
 
@@ -155,25 +188,6 @@ class NewsRelationManager extends RelationManager
                 CreateAction::make()->label('إضافة خبر')->modalHeading('إضافة خبر'),
             ])
             ->recordActions([
-                Action::make('summarize')
-                    ->label('')
-                    ->icon('heroicon-o-sparkles')
-                    ->color('primary')
-                    ->tooltip('توليد نبذة ذكية من المحتوى')
-                    ->requiresConfirmation()
-                    ->modalHeading('نبذة ذكية')
-                    ->modalDescription('يلخّص الخبر إلى نبذة عبر الذكاء (تكلفة بسيطة). متابعة؟')
-                    ->action(function ($record) {
-                        try {
-                            $summary = app(AiSuggester::class)->summarize($record->title, $record->body);
-                            if ($summary !== '') {
-                                $record->update(['excerpt' => $summary]);
-                                Notification::make()->title('تم توليد النبذة')->success()->send();
-                            }
-                        } catch (\Throwable $e) {
-                            Notification::make()->title('تعذّر التوليد')->body($e->getMessage())->danger()->persistent()->send();
-                        }
-                    }),
                 Action::make('up')
                     ->label('')
                     ->icon('heroicon-o-chevron-up')
@@ -206,6 +220,11 @@ class NewsRelationManager extends RelationManager
                     }),
                 EditAction::make()->modalHeading('تعديل الخبر'),
                 DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->label('حذف المحدد'),
+                ]),
             ])
             ->emptyStateHeading('لا توجد أخبار بعد')
             ->emptyStateDescription('اضغط «إضافة خبر» لإضافة أول خبر لهذا العدد.');

@@ -20,6 +20,9 @@ class NewsCandidateResource extends Resource
 {
     protected static ?string $model = NewsCandidate::class;
 
+    // نستورد الأخبار مباشرة داخل العدد — نخفي المرشّحة من القائمة الجانبية
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'title';
