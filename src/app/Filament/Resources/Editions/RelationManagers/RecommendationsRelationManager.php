@@ -49,7 +49,6 @@ class RecommendationsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description('لإعادة ترتيب التوصيات: اسحب الصف من مقبض السحب ⠿ على جانبه.')
             ->reorderable('position')
             ->defaultSort('position')
             ->columns([

@@ -48,7 +48,6 @@ class EventsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description('لإعادة ترتيب الفعاليات: اسحب الصف من مقبض السحب ⠿ على جانبه.')
             ->reorderable('position')
             ->defaultSort('position')
             ->columns([

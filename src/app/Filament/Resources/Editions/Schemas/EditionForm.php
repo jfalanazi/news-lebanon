@@ -18,7 +18,7 @@ class EditionForm
         return $schema
             ->columns(2)
             ->components([
-                // يمين (البداية): بيانات العدد المضغوطة
+                // يمين (البداية): بيانات العدد + التذييل والرابط (يملأ العمود بالكامل)
                 Section::make('بيانات العدد')
                     ->description('تُملأ تلقائيًا — عدّلها عند الحاجة.')
                     ->columnSpan(1)
@@ -49,6 +49,11 @@ class EditionForm
                             ])
                             ->default('draft')
                             ->required(),
+                        TextInput::make('quote')
+                            ->label('عبارة التذييل'),
+                        TextInput::make('caption_link')
+                            ->label('رابط التعليق / QR')
+                            ->url(),
                     ]),
 
                 // يسار (النهاية): المعاينة الحيّة
@@ -75,20 +80,6 @@ class EditionForm
                             'hasImage'  => $hasImage,
                         ])->render());
                     }),
-
-                // أسفل بعرض كامل: الجملة والرابط
-                Section::make('التذييل والرابط')
-                    ->columnSpanFull()
-                    ->columns(2)
-                    ->schema([
-                        TextInput::make('quote')
-                            ->label('عبارة التذييل')
-                            ->columnSpanFull(),
-                        TextInput::make('caption_link')
-                            ->label('رابط التعليق / QR')
-                            ->url()
-                            ->columnSpanFull(),
-                    ]),
             ]);
     }
 }
