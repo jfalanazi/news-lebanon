@@ -4,6 +4,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 class EditionsTable
 {
@@ -14,6 +15,7 @@ class EditionsTable
             ->columns([
                 TextColumn::make('issue_number')
                     ->label('رقم العدد')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('edition_date')
                     ->label('التاريخ')
@@ -28,7 +30,14 @@ class EditionsTable
                     ->label('عدد الأخبار')
                     ->counts('news'),
             ])
-            ->filters([])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('الحالة')
+                    ->options([
+                        'draft' => 'مسودة',
+                        'published' => 'منشور',
+                    ]),
+            ])
             ->recordActions([
                 EditAction::make(),
             ])
