@@ -40,10 +40,14 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
             ])
-            // تعتيم تدريجي للأخبار المُطفأة في الجداول
+            // تعتيم تدريجي للأخبار المُطفأة + محاذاة أزرار الهيدر لليمين (RTL)
             ->renderHook(
                 'panels::head.end',
-                fn (): string => '<style>.nashra-dim{opacity:.4 !important;transition:opacity .35s ease}</style>',
+                fn (): string => '<style>'
+                    . '.nashra-dim{opacity:.4 !important;transition:opacity .35s ease}'
+                    . '.fi-header{justify-content:flex-start !important;gap:1rem;flex-wrap:wrap}'
+                    . '.fi-header-heading{flex:0 1 auto !important}'
+                    . '</style>',
             )
             ->middleware([
                 EncryptCookies::class,

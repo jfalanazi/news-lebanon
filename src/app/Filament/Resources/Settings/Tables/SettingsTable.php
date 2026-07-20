@@ -12,7 +12,9 @@ class SettingsTable
         return $table
             ->columns([
                 TextColumn::make('key')
-                    ->label('المفتاح')
+                    ->label('الإعداد')
+                    ->formatStateUsing(fn (string $state): string => \App\Models\Setting::labelFor($state))
+                    ->description(fn ($record): string => $record->key)
                     ->searchable(),
                 TextColumn::make('value')
                     ->label('القيمة')

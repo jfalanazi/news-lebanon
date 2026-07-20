@@ -9,12 +9,13 @@ class SettingForm
         return $schema
             ->components([
                 TextInput::make('key')
-                    ->label('المفتاح')
+                    ->label('المفتاح التقني')
                     ->required()
                     ->disabled()
                     ->dehydrated(),
                 TextInput::make('value')
                     ->label('القيمة')
+                    ->helperText(fn ($record): ?string => $record ? \App\Models\Setting::labelFor($record->key) : null)
                     ->columnSpanFull(),
             ]);
     }

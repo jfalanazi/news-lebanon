@@ -16,4 +16,19 @@ class Setting extends Model
     {
         static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
     }
+
+    // اسم عربي مفهوم لكل إعداد
+    public static function labelFor(string $key): string
+    {
+        return [
+            'issue_anchor_number' => 'رقم مرساة العدد (نظام ترقيم قديم)',
+            'issue_anchor_date'   => 'تاريخ مرساة العدد (نظام ترقيم قديم)',
+            'prayer_method'       => 'طريقة حساب مواقيت الصلاة',
+            'prayer_fajr_angle'   => 'زاوية الفجر (درجات)',
+            'prayer_isha_angle'   => 'زاوية العشاء (درجات)',
+            'weather_lat'         => 'خط عرض موقع الطقس (بيروت)',
+            'weather_lng'         => 'خط طول موقع الطقس (بيروت)',
+            'default_quote'       => 'عبارة التذييل الافتراضية',
+        ][$key] ?? $key;
+    }
 }
