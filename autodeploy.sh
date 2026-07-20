@@ -5,6 +5,8 @@ set -euo pipefail
 
 # مسارات docker/git لبيئة cron المحدودة (Apple Silicon + Intel)
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+# لا تنتظر إدخال بيانات دخول (يفشل بوضوح بدل التعليق في cron)
+export GIT_TERMINAL_PROMPT=0
 
 cd "$(dirname "$0")"
 
