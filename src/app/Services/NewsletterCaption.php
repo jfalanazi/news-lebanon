@@ -50,10 +50,9 @@ class NewsletterCaption
             $lines[] = "« {$quote} »";
         }
 
-        if ($edition->caption_link) {
-            $lines[] = '';
-            $lines[] = "🔗 {$edition->caption_link}";
-        }
+        $link = $edition->caption_link ?: url('/n/' . $edition->issue_number);
+        $lines[] = '';
+        $lines[] = "🔗 التفاصيل والروابط: {$link}";
 
         return implode("\n", $lines);
     }

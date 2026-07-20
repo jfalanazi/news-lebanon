@@ -46,9 +46,9 @@ class NewsletterRenderer
         $weather = $this->validWeather($edition->weather) ? $edition->weather : $this->fetchWeather();
         $prayers = $this->validPrayers($edition->prayers) ? $edition->prayers : $this->fetchPrayers();
 
-        $qrUrl = $edition->caption_link
-            ? 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' . urlencode($edition->caption_link)
-            : null;
+        // الباركود يوجّه للصفحة العامة للعدد افتراضيًا (أو رابط مخصّص إن وُجد)
+        $link = $edition->caption_link ?: url('/n/' . $edition->issue_number);
+        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' . urlencode($link);
 
         return [
             'issue'   => $edition->issue_number,

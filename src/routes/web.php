@@ -16,3 +16,11 @@ Route::get('/e/{edition}/preview', function (Edition $edition) {
 
     return View::make('newsletter', $data);
 })->name('edition.preview');
+
+// الصفحة العامة لكل عدد — يفتحها الباركود، فيها تفاصيل وروابط الأخبار
+Route::get('/n/{issue}', function (int $issue) {
+    $edition = Edition::where('issue_number', $issue)->firstOrFail();
+    $edition->load(['news', 'recommendations', 'events']);
+
+    return View::make('edition-public', ['edition' => $edition]);
+})->name('edition.public');
