@@ -43,7 +43,7 @@ class AiNewsCurator
             'content-type'      => 'application/json',
         ])->timeout(90)->post('https://api.anthropic.com/v1/messages', [
             'model'      => config('services.anthropic.model'),
-            'max_tokens' => 3000,
+            'max_tokens' => 1500,
             'messages'   => [
                 ['role' => 'user', 'content' => $prompt],
             ],

@@ -72,6 +72,9 @@ class NewsCandidatesTable
                     ->label('توليد ذكي (١٠)')
                     ->icon('heroicon-o-sparkles')
                     ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading('توليد ذكي')
+                    ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
                     ->action(function () {
                         // اسحب طازة من المصادر
                         app(NewsFetcher::class)->fetchAll();

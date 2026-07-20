@@ -78,6 +78,9 @@ class NewsRelationManager extends RelationManager
                     ->label('توليد ذكي')
                     ->icon('heroicon-o-sparkles')
                     ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading('توليد ذكي')
+                    ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
                     ->action(function () {
                         $edition = $this->getOwnerRecord();
 

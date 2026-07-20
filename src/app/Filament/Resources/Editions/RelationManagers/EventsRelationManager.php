@@ -67,6 +67,9 @@ class EventsRelationManager extends RelationManager
                     ->label('اقتراح ذكي')
                     ->icon('heroicon-o-sparkles')
                     ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading('اقتراح ذكي')
+                    ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
                     ->action(function () {
                         $edition = $this->getOwnerRecord();
 
