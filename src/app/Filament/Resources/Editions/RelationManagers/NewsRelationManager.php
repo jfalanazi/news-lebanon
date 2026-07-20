@@ -19,7 +19,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class NewsRelationManager extends RelationManager
@@ -118,8 +117,6 @@ class NewsRelationManager extends RelationManager
                     ->color(fn (string $state): string => match ($state) {
                         'breaking' => 'danger', 'important' => 'warning', default => 'gray',
                     }),
-                ToggleColumn::make('active')
-                    ->label('مُفعّل'),
                 TextColumn::make('source_name')
                     ->label('المصدر')
                     ->badge()
@@ -131,7 +128,6 @@ class NewsRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state): string => $state ? '✨ ذكاء' : '✍️ يدوي')
                     ->color(fn ($state): string => $state ? 'primary' : 'gray'),
             ])
-            ->recordClasses(fn ($record) => $record->active ? null : 'nashra-dim')
             ->headerActions([
                 CreateAction::make()
                     ->label('➕ إضافة خبر')
@@ -228,7 +224,7 @@ class NewsRelationManager extends RelationManager
                         }
                     }),
                 EditAction::make()->modalHeading('تعديل الخبر'),
-                DeleteAction::make(),
+                DeleteAction::make()->requiresConfirmation(false),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

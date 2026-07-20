@@ -177,8 +177,9 @@ class NewsletterRenderer
 
     private function fetchWeather(): array
     {
-        $lat = Setting::get('weather_lat', '33.8938');
-        $lng = Setting::get('weather_lng', '35.5018');
+        $city = Setting::cityData();
+        $lat = $city['lat'];
+        $lng = $city['lng'];
         try {
             $r = Http::timeout(15)->get('https://api.open-meteo.com/v1/forecast', [
                 'latitude' => $lat, 'longitude' => $lng,
@@ -218,7 +219,7 @@ class NewsletterRenderer
         $default = ['الفجر'=>'04:12','الشروق'=>'05:42','الظهر'=>'12:38','العصر'=>'16:18','المغرب'=>'19:34','العشاء'=>'21:04'];
         try {
             $r = Http::timeout(15)->get('https://api.aladhan.com/v1/timingsByCity', [
-                'city' => 'Beirut', 'country' => 'Lebanon',
+                'city' => Setting::cityData()['aladhan'], 'country' => 'Lebanon',
                 'method' => 99, 'methodSettings' => '18,null,17.5',
             ])->json();
             $t = $r['data']['timings'];
