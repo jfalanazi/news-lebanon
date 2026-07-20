@@ -89,6 +89,7 @@
       </div>
       <div class="n-title">{{ $n->title }}</div>
       @if($n->excerpt)<div class="n-excerpt">{{ $n->excerpt }}</div>@endif
+      @if($n->body)<div style="font-size:14px;color:var(--text);margin-top:8px;line-height:1.85;white-space:pre-line">{{ $n->body }}</div>@endif
       @if($n->url)<a class="n-link" href="{{ $n->url }}" target="_blank" rel="noopener">اقرأ المصدر ↗</a>@endif
     </div>
   @empty

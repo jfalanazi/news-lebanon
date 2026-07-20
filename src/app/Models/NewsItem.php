@@ -8,7 +8,7 @@ class NewsItem extends Model
 {
     protected $fillable = [
         'edition_id', 'category', 'url', 'source_name',
-        'title', 'excerpt', 'priority', 'position', 'ai_generated', 'active',
+        'title', 'excerpt', 'body', 'priority', 'position', 'ai_generated', 'active',
     ];
 
     protected $casts = ['ai_generated' => 'boolean', 'active' => 'boolean'];

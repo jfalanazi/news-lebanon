@@ -51,6 +51,34 @@ class AiSuggester
         return $this->call($prompt);
     }
 
+    /** يلخّص خبرًا إلى نبذة سطر واحد (≤ 20 كلمة) */
+    public function summarize(string $title, ?string $body = null): string
+    {
+        $key = config('services.anthropic.key');
+        if (empty($key)) {
+            throw new \RuntimeException('لم يُضبط ANTHROPIC_API_KEY في ملف .env على السيرفر.');
+        }
+
+        $source = trim($title . "\n" . ($body ?? ''));
+        $prompt = "لخّص الخبر التالي في **نبذة عربية فصيحة، سطر واحد، لا تتجاوز 20 كلمة**، دون مقدمات.\n\nالخبر:\n" . $source;
+
+        $resp = Http::withHeaders([
+            'x-api-key'         => $key,
+            'anthropic-version' => '2023-06-01',
+            'content-type'      => 'application/json',
+        ])->timeout(60)->post('https://api.anthropic.com/v1/messages', [
+            'model'      => config('services.anthropic.model'),
+            'max_tokens' => 200,
+            'messages'   => [['role' => 'user', 'content' => $prompt]],
+        ]);
+
+        if (! $resp->successful()) {
+            throw new \RuntimeException('فشل الاتصال بالذكاء (' . $resp->status() . '): ' . $resp->body());
+        }
+
+        return trim((string) $resp->json('content.0.text', ''));
+    }
+
     /** يقترح فعاليات لبنانية قادمة (تواريخها تقريبية وتحتاج تدقيقًا) */
     public function events(int $count = 3): array
     {
