@@ -12,7 +12,6 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -50,7 +49,7 @@ class NewsRelationManager extends RelationManager
                 ->rows(2)
                 ->maxLength(500)
                 ->hintAction(
-                    FormAction::make('summarize')
+                    Action::make('summarize')
                         ->label('✨ توليد من المحتوى')
                         ->action(function ($get, $set) {
                             $body = trim((string) $get('body'));
@@ -121,17 +120,28 @@ class NewsRelationManager extends RelationManager
                     }),
                 ToggleColumn::make('active')
                     ->label('مُفعّل'),
+                TextColumn::make('source_name')
+                    ->label('المصدر')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('—'),
                 TextColumn::make('ai_generated')
                     ->label('الأصل')
                     ->badge()
                     ->formatStateUsing(fn ($state): string => $state ? '✨ ذكاء' : '✍️ يدوي')
                     ->color(fn ($state): string => $state ? 'primary' : 'gray'),
             ])
+            ->recordClasses(fn ($record) => $record->active ? null : 'nashra-dim')
             ->headerActions([
+                CreateAction::make()
+                    ->label('➕ إضافة خبر')
+                    ->modalHeading('إضافة خبر')
+                    ->color('primary')
+                    ->button(),
                 Action::make('aiGenerate')
                     ->label('توليد ذكي')
                     ->icon('heroicon-o-sparkles')
-                    ->color('primary')
+                    ->color('gray')
                     ->requiresConfirmation()
                     ->modalHeading('توليد ذكي')
                     ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
@@ -185,7 +195,6 @@ class NewsRelationManager extends RelationManager
 
                         Notification::make()->title("أُضيف {$added} خبرًا بالذكاء")->success()->send();
                     }),
-                CreateAction::make()->label('إضافة خبر')->modalHeading('إضافة خبر'),
             ])
             ->recordActions([
                 Action::make('up')

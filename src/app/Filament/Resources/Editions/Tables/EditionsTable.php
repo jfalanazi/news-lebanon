@@ -1,5 +1,6 @@
 <?php
 namespace App\Filament\Resources\Editions\Tables;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -39,6 +40,12 @@ class EditionsTable
                     ]),
             ])
             ->recordActions([
+                Action::make('web')
+                    ->label('صفحة الويب')
+                    ->icon('heroicon-o-globe-alt')
+                    ->color('gray')
+                    ->url(fn ($record): string => url('/n/' . $record->issue_number))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([

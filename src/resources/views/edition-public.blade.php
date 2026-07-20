@@ -49,6 +49,14 @@
   .n-link{display:inline-block;margin-top:9px;font-weight:600;font-size:13px;color:var(--cedar);text-decoration:none;
     border:1px solid var(--goldSoft);border-radius:8px;padding:5px 12px}
   .n-link:active{background:#EFEADF}
+  .n-more{margin-top:8px}
+  .n-more summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--cedar);list-style:none;display:inline-block}
+  .n-more summary::-webkit-details-marker{display:none}
+  .n-more summary::before{content:"▾ ";}
+  .n-more[open] summary::before{content:"▴ ";}
+  .n-bodyfull{font-size:14px;color:var(--text);margin-top:8px;line-height:1.85;white-space:pre-line}
+  .n-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .src-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:#F1EAD5;color:var(--cedarDeep);padding:4px 12px;border-radius:20px;border:1px solid var(--goldSoft)}
   .chip{display:inline-block;font-size:12px;font-weight:600;background:#EBE2C9;color:var(--cedar);padding:2px 10px;border-radius:12px;margin-top:6px}
   .foot{text-align:center;color:var(--mut);font-size:14px;padding:22px 24px 0;line-height:1.9}
   .foot b{color:var(--cedar)}
@@ -78,19 +86,33 @@
        style="background:#EFEADF;color:#20302A;border:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px;cursor:pointer">نسخ الرابط</button>
   </div>
 
-  {{-- الأخبار --}}
+  {{-- الأخبار: مرتّبة تلقائيًا (عاجل ← مهم ← عادي) --}}
+  @php
+    $rank = ['breaking' => 0, 'important' => 1, 'normal' => 2];
+    $newsList = $edition->news
+        ->filter(fn ($n) => $n->active !== false)
+        ->sortBy(fn ($n) => sprintf('%d_%09d', $rank[$n->priority] ?? 3, (int) $n->position));
+  @endphp
   <div class="sec"><div class="sec-title">أهم الأخبار</div></div>
-  @forelse ($edition->news->filter(fn ($n) => $n->active !== false) as $n)
+  @forelse ($newsList as $n)
     <div class="card">
       <div class="n-top">
         @if($n->priority === 'breaking')<span class="badge b-breaking">عاجل</span>
         @elseif($n->priority === 'important')<span class="badge b-important">مهم</span>@endif
-        <span class="n-cat">{{ $n->category }}@if($n->source_name) — {{ $n->source_name }}@endif</span>
+        <span class="n-cat">{{ $n->category }}</span>
       </div>
       <div class="n-title">{{ $n->title }}</div>
       @if($n->excerpt)<div class="n-excerpt">{{ $n->excerpt }}</div>@endif
-      @if($n->body)<div style="font-size:14px;color:var(--text);margin-top:8px;line-height:1.85;white-space:pre-line">{{ $n->body }}</div>@endif
-      @if($n->url)<a class="n-link" href="{{ $n->url }}" target="_blank" rel="noopener">اقرأ المصدر ↗</a>@endif
+      @if($n->body)
+        <details class="n-more">
+          <summary>اقرأ المزيد</summary>
+          <div class="n-bodyfull">{{ $n->body }}</div>
+        </details>
+      @endif
+      <div class="n-foot">
+        @if($n->url)<a class="n-link" href="{{ $n->url }}" target="_blank" rel="noopener">اقرأ المصدر ↗</a>@endif
+        @if($n->source_name)<span class="src-badge">🗞️ {{ $n->source_name }}</span>@endif
+      </div>
     </div>
   @empty
     <div class="empty">لا توجد أخبار في هذا العدد.</div>

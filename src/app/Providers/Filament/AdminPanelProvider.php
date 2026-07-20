@@ -39,8 +39,12 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
+            // تعتيم تدريجي للأخبار المُطفأة في الجداول
+            ->renderHook(
+                'panels::head.end',
+                fn (): string => '<style>.nashra-dim{opacity:.4 !important;transition:opacity .35s ease}</style>',
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

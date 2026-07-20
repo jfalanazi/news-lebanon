@@ -22,8 +22,11 @@ class NewsletterRenderer
     {
         $date = Carbon::parse($edition->edition_date);
 
+        // ترتيب تلقائي: عاجل ثم مهم ثم عادي، وداخل كل مستوى حسب الترتيب اليدوي
+        $rank = ['breaking' => 0, 'important' => 1, 'normal' => 2];
         $news = $edition->news
             ->filter(fn ($n) => $n->active !== false)
+            ->sortBy(fn ($n) => sprintf('%d_%09d', $rank[$n->priority] ?? 3, (int) $n->position))
             ->map(fn ($n) => [
                 'category'    => $n->category,
                 'source_name' => $n->source_name,
