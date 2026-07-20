@@ -31,14 +31,15 @@ class NewsCandidatesTable
                 continue;
             }
             NewsItem::create([
-                'edition_id'  => $edition->id,
-                'category'    => $c->category,
-                'url'         => $c->url,
-                'source_name' => $c->source_name,
-                'title'       => $c->title,
-                'excerpt'     => $c->excerpt,
-                'priority'    => $c->priority ?: 'normal',
-                'position'    => ++$pos,
+                'edition_id'   => $edition->id,
+                'category'     => $c->category,
+                'url'          => $c->url,
+                'source_name'  => $c->source_name,
+                'title'        => $c->title,
+                'excerpt'      => $c->excerpt,
+                'priority'     => $c->priority ?: 'normal',
+                'position'     => ++$pos,
+                'ai_generated' => (bool) $c->ai_processed,
             ]);
             $c->update(['used' => true]);
             $added++;

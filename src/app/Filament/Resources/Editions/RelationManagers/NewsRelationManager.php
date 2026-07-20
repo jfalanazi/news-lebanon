@@ -72,6 +72,11 @@ class NewsRelationManager extends RelationManager
                     }),
                 TextColumn::make('source_name')
                     ->label('المصدر'),
+                TextColumn::make('ai_generated')
+                    ->label('الأصل')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => $state ? '✨ ذكاء' : '✍️ يدوي')
+                    ->color(fn ($state): string => $state ? 'primary' : 'gray'),
             ])
             ->headerActions([
                 Action::make('aiGenerate')
@@ -116,13 +121,14 @@ class NewsRelationManager extends RelationManager
                         $added = 0;
                         foreach ($toAdd as $c) {
                             $edition->news()->create([
-                                'category'    => $c->category,
-                                'url'         => $c->url,
-                                'source_name' => $c->source_name,
-                                'title'       => $c->title,
-                                'excerpt'     => $c->excerpt,
-                                'priority'    => $c->priority ?: 'normal',
-                                'position'    => ++$pos,
+                                'category'     => $c->category,
+                                'url'          => $c->url,
+                                'source_name'  => $c->source_name,
+                                'title'        => $c->title,
+                                'excerpt'      => $c->excerpt,
+                                'priority'     => $c->priority ?: 'normal',
+                                'position'     => ++$pos,
+                                'ai_generated' => true,
                             ]);
                             $c->update(['used' => true]);
                             $added++;

@@ -4,6 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>نشرة لبنان — العدد {{ $edition->issue_number }}</title>
+@php
+    $ogImg = url('/storage/newsletters/edition-' . $edition->issue_number . '.png');
+    $ogDesc = 'أهم أخبار لبنان ليوم ' . \Carbon\Carbon::parse($edition->edition_date)->format('Y/m/d') . ' — مع الطقس والصلاة والتوصيات والفعاليات.';
+@endphp
+<meta name="description" content="{{ $ogDesc }}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="نشرة لبنان — العدد {{ $edition->issue_number }}">
+<meta property="og:description" content="{{ $ogDesc }}">
+<meta property="og:image" content="{{ $ogImg }}">
+<meta property="og:url" content="{{ url('/n/' . $edition->issue_number) }}">
+<meta property="og:site_name" content="نشرة لبنان">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="نشرة لبنان — العدد {{ $edition->issue_number }}">
+<meta name="twitter:description" content="{{ $ogDesc }}">
+<meta name="twitter:image" content="{{ $ogImg }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
