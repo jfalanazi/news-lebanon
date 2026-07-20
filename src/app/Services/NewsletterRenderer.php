@@ -42,9 +42,22 @@ class NewsletterRenderer
             'range'    => $this->eventRange($e->start_date, $e->end_date),
         ])->take(3)->values()->all();
 
-        // الطقس والصلاة: من لقطة العدد إن وُجدت، وإلا نجلبها الآن
+        // الطقس والصلاة: من لقطة العدد إن وُجدت، وإلا نجلبها ونخزّنها معه (تسريع + ثبات)
         $weather = $this->validWeather($edition->weather) ? $edition->weather : $this->fetchWeather();
         $prayers = $this->validPrayers($edition->prayers) ? $edition->prayers : $this->fetchPrayers();
+
+        $dirty = false;
+        if (! $this->validWeather($edition->weather) && $this->validWeather($weather)) {
+            $edition->weather = $weather;
+            $dirty = true;
+        }
+        if (! $this->validPrayers($edition->prayers) && $this->validPrayers($prayers)) {
+            $edition->prayers = $prayers;
+            $dirty = true;
+        }
+        if ($dirty) {
+            $edition->saveQuietly();
+        }
 
         // الباركود يوجّه للصفحة العامة للعدد افتراضيًا (أو رابط مخصّص إن وُجد)
         $link = $edition->caption_link ?: url('/n/' . $edition->issue_number);

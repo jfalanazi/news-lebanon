@@ -67,6 +67,19 @@
     <div class="h-sub">{{ $date->translatedFormat('l') }} · {{ $date->format('Y/m/d') }}</div>
   </div>
 
+  @php
+    $pageUrl = url('/n/' . $edition->issue_number);
+    $shareText = 'نشرة لبنان — العدد ' . $edition->issue_number;
+  @endphp
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 16px 2px">
+    <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $pageUrl) }}" target="_blank" rel="noopener"
+       style="background:#25D366;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px">واتساب</a>
+    <a href="https://twitter.com/intent/tweet?text={{ urlencode($shareText) }}&url={{ urlencode($pageUrl) }}" target="_blank" rel="noopener"
+       style="background:#111;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px">X</a>
+    <button type="button" onclick="navigator.clipboard.writeText('{{ $pageUrl }}');this.textContent='✓ نُسخ';setTimeout(()=>this.textContent='نسخ الرابط',1500)"
+       style="background:#EFEADF;color:#20302A;border:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px;cursor:pointer">نسخ الرابط</button>
+  </div>
+
   {{-- الأخبار --}}
   <div class="sec"><div class="sec-title">أهم الأخبار</div></div>
   @forelse ($edition->news as $n)
