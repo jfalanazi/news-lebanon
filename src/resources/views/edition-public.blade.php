@@ -73,16 +73,14 @@
   @endphp
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 16px 2px">
     <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $pageUrl) }}" target="_blank" rel="noopener"
-       style="background:#25D366;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px">واتساب</a>
-    <a href="https://twitter.com/intent/tweet?text={{ urlencode($shareText) }}&url={{ urlencode($pageUrl) }}" target="_blank" rel="noopener"
-       style="background:#111;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px">X</a>
+       style="background:#25D366;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 18px;border-radius:10px">مشاركة واتساب</a>
     <button type="button" onclick="navigator.clipboard.writeText('{{ $pageUrl }}');this.textContent='✓ نُسخ';setTimeout(()=>this.textContent='نسخ الرابط',1500)"
        style="background:#EFEADF;color:#20302A;border:none;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px;cursor:pointer">نسخ الرابط</button>
   </div>
 
   {{-- الأخبار --}}
   <div class="sec"><div class="sec-title">أهم الأخبار</div></div>
-  @forelse ($edition->news as $n)
+  @forelse ($edition->news->filter(fn ($n) => $n->active !== false) as $n)
     <div class="card">
       <div class="n-top">
         @if($n->priority === 'breaking')<span class="badge b-breaking">عاجل</span>

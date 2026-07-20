@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class NewsRelationManager extends RelationManager
@@ -61,6 +62,14 @@ class NewsRelationManager extends RelationManager
                     ->label('العنوان')
                     ->wrap()
                     ->searchable(),
+                TextColumn::make('category')
+                    ->label('التصنيف')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'سياسة' => 'info', 'اقتصاد' => 'success', 'أمن' => 'danger',
+                        'رياضة' => 'warning', 'مجتمع' => 'primary', 'دولي' => 'info',
+                        default => 'gray',
+                    }),
                 TextColumn::make('priority')
                     ->label('الأولوية')
                     ->badge()
@@ -70,8 +79,8 @@ class NewsRelationManager extends RelationManager
                     ->color(fn (string $state): string => match ($state) {
                         'breaking' => 'danger', 'important' => 'warning', default => 'gray',
                     }),
-                TextColumn::make('source_name')
-                    ->label('المصدر'),
+                ToggleColumn::make('active')
+                    ->label('مُفعّل'),
                 TextColumn::make('ai_generated')
                     ->label('الأصل')
                     ->badge()
@@ -139,6 +148,36 @@ class NewsRelationManager extends RelationManager
                 CreateAction::make()->label('إضافة خبر'),
             ])
             ->recordActions([
+                Action::make('up')
+                    ->label('')
+                    ->icon('heroicon-o-chevron-up')
+                    ->color('gray')
+                    ->tooltip('رفع لأعلى')
+                    ->action(function ($record) {
+                        $above = $record->edition->news()
+                            ->where('position', '<', $record->position)
+                            ->orderByDesc('position')->first();
+                        if ($above) {
+                            $p = $record->position;
+                            $record->update(['position' => $above->position]);
+                            $above->update(['position' => $p]);
+                        }
+                    }),
+                Action::make('down')
+                    ->label('')
+                    ->icon('heroicon-o-chevron-down')
+                    ->color('gray')
+                    ->tooltip('تنزيل لأسفل')
+                    ->action(function ($record) {
+                        $below = $record->edition->news()
+                            ->where('position', '>', $record->position)
+                            ->orderBy('position')->first();
+                        if ($below) {
+                            $p = $record->position;
+                            $record->update(['position' => $below->position]);
+                            $below->update(['position' => $p]);
+                        }
+                    }),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

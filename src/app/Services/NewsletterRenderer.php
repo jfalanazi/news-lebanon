@@ -22,13 +22,15 @@ class NewsletterRenderer
     {
         $date = Carbon::parse($edition->edition_date);
 
-        $news = $edition->news->map(fn ($n) => [
-            'category'    => $n->category,
-            'source_name' => $n->source_name,
-            'title'       => $n->title,
-            'excerpt'     => $n->excerpt,
-            'priority'    => $n->priority,
-        ])->take(7)->values()->all();
+        $news = $edition->news
+            ->filter(fn ($n) => $n->active !== false)
+            ->map(fn ($n) => [
+                'category'    => $n->category,
+                'source_name' => $n->source_name,
+                'title'       => $n->title,
+                'excerpt'     => $n->excerpt,
+                'priority'    => $n->priority,
+            ])->take(7)->values()->all();
 
         $recos = $edition->recommendations->map(fn ($r) => [
             'type' => $r->type,
