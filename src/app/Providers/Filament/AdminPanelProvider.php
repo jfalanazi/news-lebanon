@@ -47,6 +47,8 @@ class AdminPanelProvider extends PanelProvider
                     . '.nashra-dim{opacity:.4 !important;transition:opacity .35s ease}'
                     . '.fi-header{justify-content:flex-start !important;gap:1rem;flex-wrap:wrap}'
                     . '.fi-header-heading{flex:0 1 auto !important}'
+                    . '.fi-ta-header-toolbar{justify-content:flex-start !important;gap:.75rem}'
+                    . '.fi-ta-header-toolbar>.fi-ta-header-heading,.fi-ta-header-toolbar>.fi-ta-search-field{flex:0 1 auto !important}'
                     . '</style>',
             )
             ->middleware([

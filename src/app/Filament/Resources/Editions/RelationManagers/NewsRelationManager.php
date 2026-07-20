@@ -95,6 +95,7 @@ class NewsRelationManager extends RelationManager
         return $table
             ->reorderable('position')
             ->defaultSort('position')
+            ->description('↑↓ إعادة الترتيب: اضغط الأيقونة ثم اسحب الأخبار.')
             ->columns([
                 TextColumn::make('title')
                     ->label('العنوان')
