@@ -16,36 +16,13 @@ class EditionForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
-                Placeholder::make('preview')
-                    ->label('معاينة النشرة')
-                    ->columnSpanFull()
-                    ->content(function ($record) {
-                        if (! $record) {
-                            return new HtmlString('<div style="color:#66705F;font-size:13px">احفظ العدد أولًا لتظهر المعاينة الحيّة.</div>');
-                        }
-                        $path = storage_path('app/public/newsletters/edition-' . $record->issue_number . '.png');
-                        $hasImage = file_exists($path);
-                        $ts = $hasImage ? filemtime($path) : 0;
-                        $date = Carbon::parse($record->edition_date);
-                        $caption = "🗞️ نشرة لبنان — العدد {$record->issue_number}\n"
-                            . $date->translatedFormat('l') . ' · ' . $date->format('Y/m/d')
-                            . ($record->caption_link ? "\n🔗 " . $record->caption_link : '');
-
-                        return new HtmlString(view('filament.edition-preview', [
-                            'editionId' => $record->id,
-                            'issue'     => $record->issue_number,
-                            'ts'        => $ts,
-                            'caption'   => $caption,
-                            'hasImage'  => $hasImage,
-                        ])->render());
-                    }),
-
-                // بيانات العدد — مضغوطة في قسم قابل للطي (تُملأ تلقائيًا غالبًا)
+                // يمين (البداية): بيانات العدد المضغوطة
                 Section::make('بيانات العدد')
-                    ->description('تُملأ تلقائيًا — عدّلها فقط عند الحاجة.')
-                    ->collapsible()
-                    ->columns(3)
+                    ->description('تُملأ تلقائيًا — عدّلها عند الحاجة.')
+                    ->columnSpan(1)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('issue_number')
                             ->label('رقم العدد')
@@ -72,6 +49,38 @@ class EditionForm
                             ])
                             ->default('draft')
                             ->required(),
+                    ]),
+
+                // يسار (النهاية): المعاينة الحيّة
+                Placeholder::make('preview')
+                    ->label('معاينة النشرة')
+                    ->columnSpan(1)
+                    ->content(function ($record) {
+                        if (! $record) {
+                            return new HtmlString('<div style="color:#66705F;font-size:13px">احفظ العدد أولًا لتظهر المعاينة الحيّة.</div>');
+                        }
+                        $path = storage_path('app/public/newsletters/edition-' . $record->issue_number . '.png');
+                        $hasImage = file_exists($path);
+                        $ts = $hasImage ? filemtime($path) : 0;
+                        $date = Carbon::parse($record->edition_date);
+                        $caption = "🗞️ نشرة لبنان — العدد {$record->issue_number}\n"
+                            . $date->translatedFormat('l') . ' · ' . $date->format('Y/m/d')
+                            . ($record->caption_link ? "\n🔗 " . $record->caption_link : '');
+
+                        return new HtmlString(view('filament.edition-preview', [
+                            'editionId' => $record->id,
+                            'issue'     => $record->issue_number,
+                            'ts'        => $ts,
+                            'caption'   => $caption,
+                            'hasImage'  => $hasImage,
+                        ])->render());
+                    }),
+
+                // أسفل بعرض كامل: الجملة والرابط
+                Section::make('التذييل والرابط')
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->schema([
                         TextInput::make('quote')
                             ->label('عبارة التذييل')
                             ->columnSpanFull(),
