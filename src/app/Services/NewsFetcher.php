@@ -9,6 +9,36 @@ use Illuminate\Support\Str;
 
 class NewsFetcher
 {
+    /** أسماء عرض موحّدة: النطاق/الاسم اللاتيني ← الاسم العربي المعتمد */
+    private const SOURCE_NAMES = [
+        'annahar.com'       => 'النهار',
+        'annahar'           => 'النهار',
+        'elnashra'          => 'النشرة',
+        'elnashra.com'      => 'النشرة',
+        'almodon'           => 'المدن',
+        'almodon.com'       => 'المدن',
+        'al-akhbar.com'     => 'الأخبار',
+        'al-akhbar'         => 'الأخبار',
+        'nna-leb.gov.lb'    => 'الوكالة الوطنية',
+        'nna'               => 'الوكالة الوطنية',
+        'lbcgroup.tv'       => 'LBCI',
+        'lbci'              => 'LBCI',
+        'lbci lebanon'      => 'LBCI',
+        'mtv lebanon'       => 'MTV',
+        'mtv.com.lb'        => 'MTV',
+        'aljadeed.tv'       => 'الجديد',
+        'al jadeed'         => 'الجديد',
+        'naharnet'          => 'نهارنت',
+        'naharnet.com'      => 'نهارنت',
+        "l'orient-le jour"  => 'لوريان لو جور',
+        'lorientlejour.com' => 'لوريان لو جور',
+    ];
+
+    public static function displayName(string $name): string
+    {
+        return self::SOURCE_NAMES[mb_strtolower(trim($name))] ?? trim($name);
+    }
+
     // يسحب من كل المصادر المفعّلة التي لها رابط RSS ويعيد ملخص النتائج
     public function fetchAll(): array
     {
@@ -86,7 +116,7 @@ class NewsFetcher
                 'for_date'    => now()->toDateString(),
                 'category'    => 'لبنان',
                 'url'         => $it['link'],
-                'source_name' => $srcName,
+                'source_name' => self::displayName($srcName),
                 'title'       => Str::limit($title, 200, ''),
                 'excerpt'     => $it['desc'] ? Str::limit(html_entity_decode($it['desc']), 200) : null,
                 'used'        => false,
