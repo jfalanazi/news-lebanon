@@ -169,9 +169,9 @@
     @endforeach
   @endif
 
-  @php $footQuote = $edition->quote ?: \App\Models\Setting::get('default_quote', ''); @endphp
-  @if($footQuote)
-    <div class="foot">« {{ $footQuote }} »<br><b>نشرة لبنان اليومية</b></div>
+  {{-- الاقتباس: من العدد فقط — بلا قيمة افتراضية --}}
+  @if($edition->quote)
+    <div class="foot">« {{ $edition->quote }} »<br><b>نشرة لبنان اليومية</b></div>
   @else
     <div class="foot"><b>نشرة لبنان اليومية</b></div>
   @endif
