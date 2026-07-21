@@ -2,7 +2,6 @@
 namespace App\Filament\Resources\Editions\Schemas;
 
 use App\Models\Edition;
-use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -18,11 +17,13 @@ class EditionForm
         return $schema
             ->columns(2)
             ->components([
-                // يمين (البداية): بيانات العدد + التذييل والرابط (يملأ العمود بالكامل)
+                // يمين (البداية): بيانات العدد — مطوية عند التحرير ليتصدّر المحتوى والمعاينة
                 Section::make('بيانات العدد')
                     ->description('تُملأ تلقائيًا — عدّلها عند الحاجة.')
                     ->columnSpan(1)
                     ->columns(1)
+                    ->collapsible()
+                    ->collapsed(fn (string $operation): bool => $operation === 'edit')
                     ->schema([
                         TextInput::make('issue_number')
                             ->label('رقم العدد')
@@ -67,16 +68,11 @@ class EditionForm
                         $path = storage_path('app/public/newsletters/edition-' . $record->issue_number . '.png');
                         $hasImage = file_exists($path);
                         $ts = $hasImage ? filemtime($path) : 0;
-                        $date = Carbon::parse($record->edition_date);
-                        $caption = "🗞️ نشرة لبنان — العدد {$record->issue_number}\n"
-                            . $date->translatedFormat('l') . ' · ' . $date->format('Y/m/d')
-                            . ($record->caption_link ? "\n🔗 " . $record->caption_link : '');
 
                         return new HtmlString(view('filament.edition-preview', [
                             'editionId' => $record->id,
                             'issue'     => $record->issue_number,
                             'ts'        => $ts,
-                            'caption'   => $caption,
                             'hasImage'  => $hasImage,
                         ])->render());
                     }),

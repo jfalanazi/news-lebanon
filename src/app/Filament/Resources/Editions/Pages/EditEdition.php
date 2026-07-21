@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
+use App\Models\NewsCandidate;
+use App\Services\AiNewsCurator;
+use App\Services\NewsFetcher;
 use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
 use Filament\Actions\Action;
@@ -15,73 +18,107 @@ class EditEdition extends EditRecord
 {
     protected static string $resource = EditionResource::class;
 
+    /**
+     * مرحلة العدد الحالية — تحدد الزر الأساسي الوحيد في الشاشة:
+     * empty (لا أخبار) → ready (أخبار بلا صورة) → rendered (صورة جاهزة) → published (منشور)
+     */
+    protected function editionStage(): string
+    {
+        $record = $this->getRecord();
+
+        if ($record->status === 'published') {
+            return 'published';
+        }
+        if (! $record->news()->exists()) {
+            return 'empty';
+        }
+
+        return $this->imageExists() ? 'rendered' : 'ready';
+    }
+
+    protected function imageExists(): bool
+    {
+        return file_exists(storage_path(
+            'app/public/newsletters/edition-' . $this->getRecord()->issue_number . '.png'
+        ));
+    }
+
+    /** مؤشّر الخطوات تحت عنوان الصفحة */
+    public function getSubheading(): ?string
+    {
+        return match ($this->editionStage()) {
+            'empty'     => 'الخطوة ١ من ٣ — أضف الأخبار (يدويًا أو بالتوليد الذكي)',
+            'ready'     => 'الخطوة ٢ من ٣ — راجع المحتوى والترتيب ثم ولّد الصورة',
+            'rendered'  => 'الخطوة ٣ من ٣ — كل شيء جاهز: انشر وشارك',
+            'published' => 'منشور ✓ — يمكنك المشاركة أو إعادة توليد الصورة بعد أي تعديل',
+            default     => null,
+        };
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            // نشر كامل: توليد الصورة + نص واتساب قابل للنسخ + تعليم العدد كمنشور
-            Action::make('publish')
-                ->label('نشر ومشاركة')
-                ->icon('heroicon-o-paper-airplane')
+            // ١) توليد ذكي — الزر الأساسي عندما يكون العدد فارغًا
+            Action::make('curate')
+                ->label('توليد ذكي')
+                ->icon('heroicon-o-sparkles')
                 ->color('primary')
-                ->modalHeading('نشر النشرة ومشاركتها')
-                ->modalDescription('سيتم توليد صورة النشرة وتجهيز نص واتساب جاهز للنسخ، وتعليم العدد كمنشور.')
-                ->modalSubmitActionLabel('توليد ونشر')
-                ->fillForm(function () {
-                    $edition = $this->record->load(['news', 'recommendations', 'events']);
-
-                    return [
-                        'caption' => $edition->news->isEmpty()
-                            ? 'أضف خبرًا واحدًا على الأقل قبل النشر.'
-                            : app(NewsletterCaption::class)->build($edition),
-                    ];
-                })
-                ->form([
-                    Textarea::make('caption')
-                        ->label('نص المشاركة (واتساب) — انسخه')
-                        ->rows(14)
-                        ->readOnly()
-                        ->extraInputAttributes(['style' => 'direction:rtl;line-height:1.9']),
-                ])
+                ->outlined(fn (): bool => $this->editionStage() !== 'empty')
+                ->requiresConfirmation()
+                ->modalHeading('تعبئة العدد بالذكاء')
+                ->modalDescription('يسحب آخر الأخبار من المصادر المفعّلة، ينتقيها بالذكاء، ويضيفها إلى هذا العدد.')
+                ->modalSubmitActionLabel('اسحب وانتقِ')
                 ->action(function () {
-                    $edition = $this->record->load(['news', 'recommendations', 'events']);
+                    $edition = $this->getRecord();
 
-                    if ($edition->news->isEmpty()) {
+                    try {
+                        app(NewsFetcher::class)->fetchAll();
+
+                        $batch = NewsCandidate::where('used', false)
+                            ->where('ai_processed', false)
+                            ->latest()->take(10)->get();
+
+                        if ($batch->isNotEmpty()) {
+                            app(AiNewsCurator::class)->process($batch);
+                        }
+
+                        $toAdd = NewsCandidate::where('used', false)
+                            ->where('ai_processed', true)
+                            ->latest()->take(7)->get();
+
+                        $pos = (int) $edition->news()->max('position');
+                        foreach ($toAdd as $c) {
+                            $edition->news()->create([
+                                'category'     => $c->category,
+                                'url'          => $c->url,
+                                'source_name'  => $c->source_name,
+                                'title'        => $c->title,
+                                'excerpt'      => $c->excerpt,
+                                'priority'     => $c->priority ?: 'normal',
+                                'position'     => ++$pos,
+                                'ai_generated' => true,
+                            ]);
+                            $c->update(['used' => true]);
+                        }
+
+                        Notification::make()->title('تمت تعبئة العدد ✨')->success()->send();
+                    } catch (\Throwable $e) {
                         Notification::make()
-                            ->title('لا توجد أخبار في هذا العدد')
-                            ->body('أضف خبرًا واحدًا على الأقل قبل النشر.')
+                            ->title('تعذّر التوليد الذكي')
+                            ->body($e->getMessage())
                             ->warning()
                             ->send();
-
-                        return;
                     }
 
-                    app(NewsletterRenderer::class)->render($edition);
-
-                    $edition->update([
-                        'status'       => 'published',
-                        'published_at' => now(),
-                    ]);
-
-                    $url = '/storage/newsletters/edition-' . $edition->issue_number . '.png';
-
-                    Notification::make()
-                        ->title('تم النشر بنجاح')
-                        ->body('الصورة جاهزة ونص المشاركة مُعبّأ في الحقل أعلاه.')
-                        ->success()
-                        ->actions([
-                            Action::make('open')
-                                ->label('فتح الصورة')
-                                ->url($url, shouldOpenInNewTab: true),
-                        ])
-                        ->persistent()
-                        ->send();
+                    $this->redirect(EditionResource::getUrl('edit', ['record' => $edition]));
                 }),
 
-            // توليد الصورة فقط (بدون تغيير الحالة)
+            // ٢) توليد الصورة — الزر الأساسي عندما توجد أخبار بلا صورة
             Action::make('generate')
                 ->label('توليد الصورة')
                 ->icon('heroicon-o-photo')
-                ->color('success')
+                ->color('primary')
+                ->outlined(fn (): bool => $this->editionStage() !== 'ready')
                 ->action(function () {
                     $edition = $this->record->load(['news', 'recommendations', 'events']);
 
@@ -99,7 +136,6 @@ class EditEdition extends EditRecord
 
                     Notification::make()
                         ->title('تم توليد صورة النشرة')
-                        ->body('الصورة جاهزة — افتحها من الرابط أدناه.')
                         ->success()
                         ->actions([
                             Action::make('open')
@@ -108,9 +144,78 @@ class EditEdition extends EditRecord
                         ])
                         ->persistent()
                         ->send();
+
+                    $this->redirect(EditionResource::getUrl('edit', ['record' => $edition]));
                 }),
 
-            DeleteAction::make(),
+            // ٣) نشر ومشاركة — الزر الأساسي عندما تكون الصورة جاهزة، ويتحول لـ«مشاركة واتساب» بعد النشر
+            Action::make('publish')
+                ->label(fn (): string => $this->editionStage() === 'published' ? 'مشاركة واتساب' : 'نشر ومشاركة')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('primary')
+                ->outlined(fn (): bool => ! in_array($this->editionStage(), ['rendered', 'published']))
+                ->modalHeading(fn (): string => $this->editionStage() === 'published' ? 'مشاركة النشرة' : 'نشر النشرة ومشاركتها')
+                ->modalDescription('انسخ التعليق، حمّل الصورة وأرفقها في واتساب كـ«مستند» لتفادي الضغط.')
+                ->modalSubmitActionLabel(fn (): string => $this->editionStage() === 'published' ? 'تم' : 'توليد ونشر')
+                ->fillForm(function () {
+                    $edition = $this->record->load(['news', 'recommendations', 'events']);
+
+                    return [
+                        'caption' => $edition->news->isEmpty()
+                            ? 'أضف خبرًا واحدًا على الأقل قبل النشر.'
+                            : app(NewsletterCaption::class)->build($edition),
+                    ];
+                })
+                ->form([
+                    Textarea::make('caption')
+                        ->label('نص المشاركة (واتساب) — انسخه')
+                        ->rows(12)
+                        ->readOnly()
+                        ->extraInputAttributes(['style' => 'direction:rtl;line-height:1.9']),
+                ])
+                ->action(function () {
+                    $edition = $this->record->load(['news', 'recommendations', 'events']);
+
+                    if ($edition->news->isEmpty()) {
+                        Notification::make()
+                            ->title('لا توجد أخبار في هذا العدد')
+                            ->body('أضف خبرًا واحدًا على الأقل قبل النشر.')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+
+                    // توليد الصورة دائمًا لتعكس آخر التعديلات
+                    app(NewsletterRenderer::class)->render($edition);
+
+                    if ($edition->status !== 'published') {
+                        $edition->update([
+                            'status'       => 'published',
+                            'published_at' => now(),
+                        ]);
+                    }
+
+                    $url = '/storage/newsletters/edition-' . $edition->issue_number . '.png';
+
+                    Notification::make()
+                        ->title($edition->wasChanged('status') ? 'تم النشر بنجاح' : 'الصورة مُحدَّثة وجاهزة للمشاركة')
+                        ->success()
+                        ->actions([
+                            Action::make('open')
+                                ->label('فتح الصورة')
+                                ->url($url, shouldOpenInNewTab: true),
+                        ])
+                        ->persistent()
+                        ->send();
+
+                    $this->redirect(EditionResource::getUrl('edit', ['record' => $edition]));
+                }),
+
+            // ٤) حذف — رابط هادئ، لا زر أحمر ممتلئ يزاحم إجراءات العمل
+            DeleteAction::make()
+                ->link()
+                ->color('danger'),
         ];
     }
 }

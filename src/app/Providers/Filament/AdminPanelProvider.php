@@ -11,7 +11,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -28,8 +27,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // هوية نشرة لبنان: أخضر أرزي أساسي + عنبري للتحذير + أحمر العلامة للخطر
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#0D5A33'),
+                'success' => Color::hex('#146B3F'),
+                'warning' => Color::hex('#B7791F'),
+                'danger'  => Color::hex('#A8342B'),
+                'gray'    => Color::Stone,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

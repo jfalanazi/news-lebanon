@@ -76,7 +76,9 @@ class ListEditions extends ListRecords
                     $this->redirect(EditionResource::getUrl('edit', ['record' => $edition]));
                 }),
 
-            CreateAction::make(),
+            // إضافة يدوية — ثانوي (زر ممتلئ واحد فقط في الشاشة: نشرة اليوم)
+            CreateAction::make()
+                ->outlined(),
         ];
     }
 }
