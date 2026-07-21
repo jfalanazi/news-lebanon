@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\Editions\RelationManagers;
 
-use App\Models\NewsCandidate;
-use App\Services\AiNewsCurator;
 use App\Services\AiSuggester;
-use App\Services\NewsFetcher;
+use App\Services\NewsPicker;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -86,7 +84,12 @@ class NewsRelationManager extends RelationManager
                 ->columnSpanFull(),
 
             TextInput::make('category')
-                ->label('التصنيف'),
+                ->label('التصنيف')
+                ->datalist(['سياسة', 'اقتصاد', 'أمن', 'مجتمع', 'رياضة', 'ثقافة', 'دولي'])
+                ->notIn(['التصنيف', 'تصنيف'])
+                ->validationMessages([
+                    'not_in' => 'اكتب تصنيفًا حقيقيًا — «التصنيف» قيمة تجريبية لا تُنشر.',
+                ]),
         ]);
     }
 
@@ -145,49 +148,20 @@ class NewsRelationManager extends RelationManager
                     ->action(function () {
                         $edition = $this->getOwnerRecord();
 
-                        app(NewsFetcher::class)->fetchAll();
-
-                        $batch = NewsCandidate::where('used', false)
-                            ->where('ai_processed', false)
-                            ->latest()->take(10)->get();
-
-                        if ($batch->isNotEmpty()) {
-                            try {
-                                app(AiNewsCurator::class)->process($batch);
-                            } catch (\Throwable $e) {
-                                Notification::make()->title('تعذّر التوليد الذكي')
-                                    ->body($e->getMessage())->danger()->persistent()->send();
-
-                                return;
-                            }
-                        }
-
-                        $toAdd = NewsCandidate::where('used', false)
-                            ->where('ai_processed', true)
-                            ->latest()->take(7)->get();
-
-                        if ($toAdd->isEmpty()) {
-                            Notification::make()->title('لا توجد أخبار جديدة')
-                                ->body('كل الأخبار مستخدمة أو لا مصادر مفعّلة.')->warning()->send();
+                        try {
+                            $added = app(NewsPicker::class)->fill($edition);
+                        } catch (\Throwable $e) {
+                            Notification::make()->title('تعذّر التوليد الذكي')
+                                ->body($e->getMessage())->danger()->persistent()->send();
 
                             return;
                         }
 
-                        $pos = (int) $edition->news()->max('position');
-                        $added = 0;
-                        foreach ($toAdd as $c) {
-                            $edition->news()->create([
-                                'category'     => $c->category,
-                                'url'          => $c->url,
-                                'source_name'  => $c->source_name,
-                                'title'        => $c->title,
-                                'excerpt'      => $c->excerpt,
-                                'priority'     => $c->priority ?: 'normal',
-                                'position'     => ++$pos,
-                                'ai_generated' => true,
-                            ]);
-                            $c->update(['used' => true]);
-                            $added++;
+                        if ($added === 0) {
+                            Notification::make()->title('لا توجد أخبار جديدة')
+                                ->body('كل الأخبار مستخدمة أو مكررة أو لا مصادر مفعّلة.')->warning()->send();
+
+                            return;
                         }
 
                         Notification::make()->title("أُضيف {$added} خبرًا بالذكاء")->success()->send();
