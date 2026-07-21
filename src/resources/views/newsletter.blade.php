@@ -36,14 +36,14 @@
   .mrule{height:7px;flex:0 0 auto;background:var(--paper);border-top:3px solid var(--gold);border-bottom:1px solid var(--gold)}
   .mrule-b{height:7px;flex:0 0 auto;background:var(--paper);border-top:1px solid var(--gold);border-bottom:3px solid var(--gold)}
 
-  /* ===== الجسم ===== */
-  .wrap{flex:1 1 auto;min-height:0;overflow:hidden;padding:28px 56px 18px;display:flex;flex-direction:column}
-  .sec-head{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:4px;flex:0 0 auto}
+  /* ===== الجسم: تدفق طبيعي ليقيس سكربت الملاءمة الارتفاع الحقيقي ===== */
+  .wrap{flex:1 1 auto;min-height:0;overflow:hidden;padding:28px 56px 18px}
+  .sec-head{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:4px}
   .sec-head h2{font-family:var(--display);font-weight:800;font-size:25px;color:var(--ink)}
   .sec-head svg{width:22px;height:22px}
 
   /* الأخبار — الخبر الأول مانشيت */
-  .news{flex:1 1 auto;min-height:0;margin-bottom:18px}
+  .news{margin-bottom:18px}
   .n-item{display:flex;gap:16px;padding:17px 0;border-bottom:1px solid var(--line)}
   .n-item:last-of-type{border-bottom:none}
   .n-item.b{border-right:3px solid var(--red);padding-right:16px}
@@ -64,7 +64,7 @@
   .w-hi,.w-lo,.w-day .t,.p-time,.n-num{font-variant-numeric:tabular-nums}
 
   /* الأحزمة المعلوماتية — بطاقات أفقية ممتدة كثيفة */
-  .band{flex:0 0 auto;background:#FFFFFF;border:1px solid var(--line);border-radius:12px;padding:16px 26px;margin-bottom:13px}
+  .band{background:#FFFFFF;border:1px solid var(--line);border-radius:12px;padding:16px 26px;margin-bottom:13px}
   .band-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
   .band-head h3{font-family:var(--display);font-weight:800;font-size:19px;color:var(--ink)}
   .band-head .note{font-size:13px;color:var(--mut);font-weight:500}
@@ -259,7 +259,7 @@
 
 </div>
 <script>
-  // ملاءمة تلقائية: مقاس ثابت 1080×1350 — تصغير عند الفيض وتكبير حتى 1.4× عند الفراغ
+  // ملاءمة تلقائية: مقاس ثابت 1080×1350 — تصغير عند الفيض وتكبير حتى 1.3× عند الفراغ
   (function () {
     var wrap = document.querySelector('.wrap');
     if (!wrap) return;
@@ -269,7 +269,7 @@
     if (fits()) {
       guard = 0;
       while (guard++ < 14) {
-        var t = Math.min(z + 0.04, 1.4);
+        var t = Math.min(z + 0.04, 1.3);
         if (t <= z) break;
         wrap.style.zoom = t.toFixed(3);
         if (!fits()) { wrap.style.zoom = z.toFixed(3); break; }
