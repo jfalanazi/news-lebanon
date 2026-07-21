@@ -14,7 +14,7 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--paper);font-family:var(--body);color:var(--text)}
-  .page{width:1080px;background:var(--paper);padding-bottom:6px}
+  .page{width:1080px;height:1350px;overflow:hidden;display:flex;flex-direction:column;background-color:var(--paper);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 14 L40 32 L58 36 L40 40 L36 58 L32 40 L14 36 L32 32 Z' fill='none' stroke='%239C8654' stroke-opacity='.055' stroke-width='1.3'/%3E%3C/svg%3E")}
 
   /* ===== الترويسة ===== */
   .mast{position:relative;overflow:hidden;background:var(--ink);color:#fff;padding:36px 56px 30px;display:flex;justify-content:space-between;align-items:flex-end}
@@ -29,7 +29,7 @@
   .mast-hijri{font-weight:400;font-size:16px;color:#A9C6B0;margin-top:4px}
 
   /* ===== الجسم ===== */
-  .wrap{padding:40px 56px 32px}
+  .wrap{flex:1 1 auto;min-height:0;overflow:hidden;padding:40px 56px 24px}
   .sec{margin-bottom:40px}
   .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
   .sec-head h2{font-family:var(--display);font-weight:800;font-size:26px;color:var(--ink)}
@@ -88,7 +88,7 @@
   .li-badge{display:inline-block;margin-top:5px;font-weight:600;font-size:15px;color:var(--cedar)}
 
   /* التذييل */
-  .foot{margin-top:8px;padding:22px 56px 30px;border-top:2px solid var(--ink);display:flex;align-items:center;gap:24px}
+  .foot{flex:0 0 auto;padding:22px 56px 30px;background:var(--paper);border-top:2px solid var(--ink);display:flex;align-items:center;gap:24px}
   .qr-wrap{flex:0 0 auto;text-align:center}
   .foot .qr{width:104px;height:104px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;margin:0 auto}
   .foot .qr img{width:100%;height:100%;display:block}
@@ -161,7 +161,7 @@
         <div class="w-now">الآن {{ $weather['now'] }}°</div>
         <div class="w-days">
           @foreach($weather['days'] as $d)
-          <div class="w-day"><div class="d">{{ $d['d'] }}</div><svg class="ic" viewBox="0 0 48 48">{!! nashra_weather_icon($d['icon']) !!}</svg><div class="t">{{ $d['hi'] }}°/{{ $d['lo'] }}°</div></div>
+          <div class="w-day"><div class="d">{{ $d['d'] }}</div><svg class="ic" viewBox="0 0 48 48">{!! nashra_weather_icon($d['icon']) !!}</svg><div class="t" dir="ltr">{{ $d['hi'] }}° / {{ $d['lo'] }}°</div></div>
           @endforeach
         </div>
       </div>
@@ -170,8 +170,10 @@
         <div class="sec-head"><h2>مواقيت الصلاة</h2></div>
         <div class="p-note">بتوقيت دار الفتوى</div>
         <div class="p-grid">
-          @foreach($prayers as $name => $time)
-          <div class="p-cell"><svg class="p-ic" viewBox="0 0 30 30">{!! nashra_prayer_icon($name) !!}</svg><div class="p-name">{{ $name }}</div><div class="p-time">{{ $time }}</div></div>
+          @foreach(['الفجر','الشروق','الظهر','العصر','المغرب','العشاء'] as $name)
+          @if(!empty($prayers[$name]))
+          <div class="p-cell"><svg class="p-ic" viewBox="0 0 30 30">{!! nashra_prayer_icon($name) !!}</svg><div class="p-name">{{ $name }}</div><div class="p-time">{{ $prayers[$name] }}</div></div>
+          @endif
           @endforeach
         </div>
       </div>
@@ -220,5 +222,25 @@
   </div>
 
 </div>
+<script>
+  // ملاءمة تلقائية: مقاس ثابت 1080×1350 — يصغّر المحتوى عند الفيض ويكبّره عند الفراغ (حتى 1.2×)
+  (function () {
+    var wrap = document.querySelector('.wrap');
+    if (!wrap) return;
+    var fits = function () { return wrap.scrollHeight <= wrap.clientHeight + 2; };
+    var z = 1, guard = 0;
+    while (!fits() && guard++ < 30) { z -= 0.03; wrap.style.zoom = z.toFixed(3); }
+    if (fits()) {
+      guard = 0;
+      while (guard++ < 12) {
+        var t = Math.min(z + 0.03, 1.2);
+        if (t <= z) break;
+        wrap.style.zoom = t.toFixed(3);
+        if (!fits()) { wrap.style.zoom = z.toFixed(3); break; }
+        z = t;
+      }
+    }
+  })();
+</script>
 </body>
 </html>
