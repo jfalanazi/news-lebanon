@@ -134,7 +134,8 @@ class NewsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('➕ إضافة خبر')
+                    ->label('إضافة خبر')
+                    ->icon('heroicon-o-plus')
                     ->modalHeading('إضافة خبر')
                     ->color('primary')
                     ->button(),
