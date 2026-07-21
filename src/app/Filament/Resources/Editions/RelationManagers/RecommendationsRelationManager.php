@@ -31,6 +31,7 @@ class RecommendationsRelationManager extends RelationManager
                     'landmark' => 'معلم',
                     'park' => 'منتزه',
                     'cafe' => 'مقهى',
+                    'other' => 'أخرى',
                 ])
                 ->default('restaurant')
                 ->required(),
@@ -57,7 +58,7 @@ class RecommendationsRelationManager extends RelationManager
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'restaurant' => 'مطعم', 'landmark' => 'معلم',
-                        'park' => 'منتزه', 'cafe' => 'مقهى', default => $state,
+                        'park' => 'منتزه', 'cafe' => 'مقهى', 'other' => 'أخرى', default => $state,
                     }),
                 TextColumn::make('name')
                     ->label('الاسم')
@@ -67,10 +68,16 @@ class RecommendationsRelationManager extends RelationManager
                     ->label('المنطقة'),
             ])
             ->headerActions([
+                CreateAction::make()
+                    ->label('إضافة توصية')
+                    ->icon('heroicon-o-plus')
+                    ->color('primary')
+                    ->button()
+                    ->modalHeading('إضافة توصية'),
                 Action::make('aiSuggest')
                     ->label('اقتراح ذكي')
                     ->icon('heroicon-o-sparkles')
-                    ->color('primary')
+                    ->color('gray')
                     ->requiresConfirmation()
                     ->modalHeading('اقتراح ذكي')
                     ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
@@ -93,7 +100,7 @@ class RecommendationsRelationManager extends RelationManager
                                 continue;
                             }
                             $edition->recommendations()->create([
-                                'type'        => in_array($r['type'] ?? '', ['restaurant', 'landmark', 'park', 'cafe'], true) ? $r['type'] : 'restaurant',
+                                'type'        => in_array($r['type'] ?? '', ['restaurant', 'landmark', 'park', 'cafe', 'other'], true) ? $r['type'] : 'restaurant',
                                 'name'        => $r['name'],
                                 'area'        => $r['area'] ?? null,
                                 'description' => $r['description'] ?? null,
@@ -104,11 +111,10 @@ class RecommendationsRelationManager extends RelationManager
 
                         Notification::make()->title("أُضيف {$added} توصية بالذكاء")->success()->send();
                     }),
-                CreateAction::make()->label('إضافة توصية'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->modalHeading('تعديل التوصية'),
+                DeleteAction::make()->requiresConfirmation(false),
             ])
             ->emptyStateHeading('لا توجد توصيات بعد');
     }

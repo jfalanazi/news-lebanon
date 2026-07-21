@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Editions\RelationManagers;
 
 use App\Services\AiSuggester;
+use App\Support\ArabicDate;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -60,13 +61,24 @@ class EventsRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('start_date')
                     ->label('البداية')
-                    ->date(),
+                    ->formatStateUsing(fn ($state): string => ArabicDate::short($state))
+                    ->placeholder('—'),
+                TextColumn::make('end_date')
+                    ->label('النهاية')
+                    ->formatStateUsing(fn ($state): string => ArabicDate::short($state))
+                    ->placeholder('—'),
             ])
             ->headerActions([
+                CreateAction::make()
+                    ->label('إضافة فعالية')
+                    ->icon('heroicon-o-plus')
+                    ->color('primary')
+                    ->button()
+                    ->modalHeading('إضافة فعالية'),
                 Action::make('aiSuggest')
                     ->label('اقتراح ذكي')
                     ->icon('heroicon-o-sparkles')
-                    ->color('primary')
+                    ->color('gray')
                     ->requiresConfirmation()
                     ->modalHeading('اقتراح ذكي')
                     ->modalDescription('سيتصل بالذكاء (تكلفة بسيطة جدًا). متابعة؟')
@@ -108,11 +120,10 @@ class EventsRelationManager extends RelationManager
                         Notification::make()->title("أُضيف {$added} فعالية بالذكاء")
                             ->body('راجِع التواريخ — قد تحتاج تدقيقًا.')->success()->send();
                     }),
-                CreateAction::make()->label('إضافة فعالية'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->modalHeading('تعديل الفعالية'),
+                DeleteAction::make()->requiresConfirmation(false),
             ])
             ->emptyStateHeading('لا توجد فعاليات بعد');
     }
