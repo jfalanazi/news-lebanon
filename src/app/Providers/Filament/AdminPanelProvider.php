@@ -42,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
             // بطاقة الترحيب/الخروج أُزيلت — اللوحة للفعل لا للعرض (الخروج من قائمة المستخدم أعلى الشاشة)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([])
-            // تعتيم تدريجي للأخبار المُطفأة + محاذاة أزرار الهيدر لليمين (RTL)
+            // تعتيم الأخبار المُطفأة + محاذاة الهيدر والتبويبات لليمين (RTL)
             ->renderHook(
                 'panels::head.end',
                 fn (): string => '<style>'
@@ -51,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                     . '.fi-header-heading{flex:0 1 auto !important}'
                     . '.fi-ta-header-toolbar{justify-content:flex-start !important;gap:.75rem}'
                     . '.fi-ta-header-toolbar>.fi-ta-header-heading,.fi-ta-header-toolbar>.fi-ta-search-field{flex:0 1 auto !important}'
+                    . '.fi-tabs{justify-content:flex-start !important;width:100%}'
                     . '</style>',
             )
             ->middleware([

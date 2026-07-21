@@ -31,7 +31,8 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--paper);color:var(--text);font-family:"IBM Plex Sans Arabic","Tajawal",sans-serif;line-height:1.6}
   .wrap{max-width:680px;margin:0 auto;padding:0 0 40px}
-  .header{background:var(--ink);color:#fff;padding:22px 20px;text-align:center;position:sticky;top:0;z-index:5}
+  /* غير لاصقة: على الجوال مساحة القراءة أهم من حضور العلامة الدائم */
+  .header{background:var(--ink);color:#fff;padding:22px 20px;text-align:center}
   .h-title{font-family:"Tajawal",sans-serif;font-weight:800;font-size:26px}
   .h-sub{font-weight:500;font-size:15px;color:#CFE3D2;margin-top:4px}
   .strip{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 0;scrollbar-width:none}
@@ -57,7 +58,7 @@
   .n-more summary::-webkit-details-marker{display:none}
   .n-more summary::before{content:"▾ ";}
   .n-more[open] summary::before{content:"▴ ";}
-  .n-bodyfull{font-size:14px;color:var(--text);margin-top:8px;line-height:1.85;white-space:pre-line}
+  .n-bodyfull{font-size:16px;color:var(--text);margin-top:10px;line-height:1.9;white-space:pre-line;border-right:2px solid var(--line);padding-right:12px}
   .n-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
   .src-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:#F1EAD5;color:var(--cedar);padding:4px 12px;border-radius:20px;border:1px solid var(--goldSoft)}
   .chip{display:inline-block;font-size:12px;font-weight:600;background:#EBE2C9;color:var(--cedar);padding:2px 10px;border-radius:12px;margin-top:6px}
@@ -95,6 +96,10 @@
     $shareText = 'نشرة لبنان — العدد ' . $edition->issue_number;
   @endphp
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 16px 2px">
+    {{-- مشاركة النظام (تظهر فقط حيث تُدعم — أغلب الجوالات) --}}
+    <button type="button" id="nshare" hidden
+       onclick="navigator.share({title:'{{ $shareText }}',url:'{{ $pageUrl }}'})"
+       style="background:#0D5A33;color:#fff;border:none;font-weight:700;font-size:13px;padding:8px 18px;border-radius:10px;cursor:pointer">مشاركة</button>
     <a href="https://wa.me/?text={{ urlencode($shareText . ' ' . $pageUrl) }}" target="_blank" rel="noopener"
        style="background:#25D366;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:8px 18px;border-radius:10px">مشاركة واتساب</a>
     <button type="button" onclick="navigator.clipboard.writeText('{{ $pageUrl }}');this.textContent='✓ نُسخ';setTimeout(()=>this.textContent='نسخ الرابط',1500)"
@@ -125,8 +130,12 @@
         </details>
       @endif
       <div class="n-foot">
-        @if($n->url)<a class="n-link" href="{{ $n->url }}" target="_blank" rel="noopener">اقرأ المصدر ↗</a>@endif
-        @if($n->source_name)<span class="src-badge">🗞️ {{ $n->source_name }}</span>@endif
+        {{-- عنصر واحد يجمع الفعل والمصدر — الشارة المنفصلة فقط إن لم يوجد رابط --}}
+        @if($n->url)
+          <a class="n-link" href="{{ $n->url }}" target="_blank" rel="noopener">اقرأ من {{ $n->source_name ?: 'المصدر' }} ↗</a>
+        @elseif($n->source_name)
+          <span class="src-badge">🗞️ {{ $n->source_name }}</span>
+        @endif
       </div>
     </div>
   @empty
@@ -168,5 +177,6 @@
   @endif
 
 </div>
+<script>if (navigator.share) { document.getElementById('nshare').hidden = false; }</script>
 </body>
 </html>
