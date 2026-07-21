@@ -83,7 +83,7 @@ class NewsletterRenderer
         ];
     }
 
-    // يولّد الصورة ويحفظها ويعيد المسار
+    // يولّد الصورة ويحفظها ويعيد المسار — مقاس ثابت 1080×1350 (×2 = 2160×2700)
     public function render(Edition $edition): string
     {
         $data = $this->buildData($edition);
@@ -98,8 +98,7 @@ class NewsletterRenderer
         Browsershot::html($html)
             ->setChromePath('/usr/bin/chromium')
             ->noSandbox()
-            ->windowSize(1080, 100)
-            ->fullPage()
+            ->windowSize(1080, 1350)
             ->waitUntilNetworkIdle()
             ->deviceScaleFactor(2)
             ->save($path);
@@ -148,11 +147,12 @@ class NewsletterRenderer
 
     private function fmtHijri(Carbon $d): string
     {
-        // تحويل هجري تقريبي عبر IntlDateFormatter إن توفّر
+        // تحويل هجري تقريبي عبر IntlDateFormatter إن توفّر — مع إزالة «هـ» المكررة من مخرجات التقويم
         if (class_exists(\IntlDateFormatter::class)) {
             $fmt = new \IntlDateFormatter('ar_SA@calendar=islamic-umalqura', \IntlDateFormatter::LONG, \IntlDateFormatter::NONE, 'Asia/Riyadh', \IntlDateFormatter::TRADITIONAL);
-            $out = $fmt->format($d->timestamp);
-            return $this->toWest($out) . ' هـ';
+            $out = $this->toWest($fmt->format($d->timestamp));
+            $out = trim(str_replace(['هـ', 'AH'], '', $out));
+            return $out . ' هـ';
         }
         return '';
     }
