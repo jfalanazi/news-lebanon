@@ -69,7 +69,7 @@
 </head>
 <body>
 @php
-    $recoType = fn($t) => match($t){'restaurant'=>'مطعم','landmark'=>'معلم','park'=>'منتزه','cafe'=>'مقهى',default=>$t};
+    $recoType = fn($t) => match($t){'restaurant'=>'مطعم','landmark'=>'معلم','park'=>'منتزه','cafe'=>'مقهى','other'=>'أخرى',default=>$t};
 @endphp
 <div class="wrap">
 
