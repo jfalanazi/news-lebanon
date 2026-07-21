@@ -68,14 +68,13 @@
 </head>
 <body>
 @php
-    $date = \Carbon\Carbon::parse($edition->edition_date);
     $recoType = fn($t) => match($t){'restaurant'=>'مطعم','landmark'=>'معلم','park'=>'منتزه','cafe'=>'مقهى',default=>$t};
 @endphp
 <div class="wrap">
 
   <div class="header">
     <div class="h-title">🇱🇧 نشرة لبنان — العدد {{ $edition->issue_number }}</div>
-    <div class="h-sub">{{ $date->translatedFormat('l') }} · {{ $date->format('Y/m/d') }}</div>
+    <div class="h-sub">{{ \App\Support\ArabicDate::full($edition->edition_date) }}</div>
   </div>
 
   {{-- شريط اليوم: الطقس ومواقيت الصلاة من لقطة العدد --}}
@@ -155,7 +154,7 @@
         @if($e->category)<div class="n-cat">{{ $e->category }}</div>@endif
         <div class="n-title">{{ $e->title }}</div>
         @if($e->start_date)
-          <span class="chip">🗓️ {{ \Carbon\Carbon::parse($e->start_date)->format('Y/m/d') }}@if($e->end_date) — {{ \Carbon\Carbon::parse($e->end_date)->format('Y/m/d') }}@endif</span>
+          <span class="chip">🗓️ {{ \App\Support\ArabicDate::short($e->start_date) }}@if($e->end_date) — {{ \App\Support\ArabicDate::short($e->end_date) }}@endif</span>
         @endif
       </div>
     @endforeach
