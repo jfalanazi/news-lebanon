@@ -19,6 +19,16 @@ class SourcesTable
                 TextColumn::make('domain')
                     ->label('النطاق')
                     ->searchable(),
+                // صحة المصدر: مفتاح التفعيل وحده لا يكشف مصدرًا مات بصمت
+                TextColumn::make('last_fetched_at')
+                    ->label('آخر سحب')
+                    ->badge()
+                    ->formatStateUsing(fn ($state, $record): string => $record->last_error
+                        ? '⚠️ فشل · ' . $state->locale('ar')->diffForHumans()
+                        : $state->locale('ar')->diffForHumans() . ' · ' . (int) ($record->last_fetch_count ?? 0) . ' خبر')
+                    ->color(fn ($record): string => $record->last_error ? 'danger' : 'success')
+                    ->tooltip(fn ($record): ?string => $record->last_error)
+                    ->placeholder('لم يُسحب بعد'),
                 ToggleColumn::make('is_active')
                     ->label('مُفعّل'),
             ])

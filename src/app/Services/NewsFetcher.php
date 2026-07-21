@@ -40,6 +40,7 @@ class NewsFetcher
     }
 
     // يسحب من كل المصادر المفعّلة التي لها رابط RSS ويعيد ملخص النتائج
+    // ويسجّل صحة كل مصدر (آخر سحب، عدد الأخبار، آخر خطأ) لعرضها في اللوحة
     public function fetchAll(): array
     {
         $report = [];
@@ -49,8 +50,17 @@ class NewsFetcher
             try {
                 $count = $this->fetchSource($source->url, $source->name);
                 $report[$source->name] = $count;
+                $source->update([
+                    'last_fetched_at'  => now(),
+                    'last_fetch_count' => $count,
+                    'last_error'       => null,
+                ]);
             } catch (\Throwable $e) {
                 $report[$source->name] = 'خطأ: ' . $e->getMessage();
+                $source->update([
+                    'last_fetched_at' => now(),
+                    'last_error'      => Str::limit($e->getMessage(), 180),
+                ]);
             }
         }
 
