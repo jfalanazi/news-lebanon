@@ -78,7 +78,8 @@ class NewsletterRenderer
             'prayers' => $prayers,
             'recos'   => $recos,
             'events'  => $events,
-            'quote'   => $edition->quote ?: Setting::get('default_quote', ''),
+            // بلا قيمة افتراضية: الحقل الفارغ = لا اقتباس في النشرة
+            'quote'   => $edition->quote,
             'qrUrl'   => $qrUrl,
         ];
     }
