@@ -17,7 +17,9 @@
   .page{width:1080px;background:var(--paper);padding-bottom:6px}
 
   /* ===== الترويسة ===== */
-  .mast{background:var(--ink);color:#fff;padding:36px 56px 30px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:5px solid var(--gold)}
+  .mast{position:relative;overflow:hidden;background:var(--ink);color:#fff;padding:36px 56px 30px;display:flex;justify-content:space-between;align-items:flex-end}
+  .mast-cedar{position:absolute;left:44px;bottom:-14px;width:200px;height:200px;opacity:.07;pointer-events:none}
+  .mrule{height:7px;background:var(--paper);border-top:3px solid var(--gold);border-bottom:1px solid var(--gold)}
   .mast-title{font-family:var(--display);font-weight:900;font-size:64px;line-height:1}
   .mast-sub{font-weight:500;font-size:22px;color:#CFE3D2;margin-top:10px}
   .mast-l{text-align:left}
@@ -87,8 +89,10 @@
 
   /* التذييل */
   .foot{margin-top:8px;padding:22px 56px 30px;border-top:2px solid var(--ink);display:flex;align-items:center;gap:24px}
-  .foot .qr{flex:0 0 auto;width:104px;height:104px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .qr-wrap{flex:0 0 auto;text-align:center}
+  .foot .qr{width:104px;height:104px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;margin:0 auto}
   .foot .qr img{width:100%;height:100%;display:block}
+  .qr-cap{font-size:12px;color:var(--mut);margin-top:6px;direction:ltr}
   .foot-t{flex:1;text-align:right}
   .foot-scan{font-weight:600;font-size:19px;color:var(--text)}
   .foot-brand{font-size:16px;color:var(--mut);margin-top:3px}
@@ -100,6 +104,10 @@
 <div class="page">
 
   <div class="mast">
+    {{-- أرزة مائية — الطابع اللبناني بلا زخرفة --}}
+    <svg class="mast-cedar" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF">
+      <path d="M50 4 C44 13 36 18 27 21 L44 21 C38 29 30 34 20 37 L45 37 C38 45 29 50 16 54 L46 54 L46 66 L40 70 L60 70 L54 66 L54 54 L84 54 C71 50 62 45 55 37 L80 37 C70 34 62 29 56 21 L73 21 C64 18 56 13 50 4 Z"/>
+    </svg>
     <div class="mast-r">
       <div class="mast-title">نشرة لبنان</div>
       <div class="mast-sub">الموجز اليومي · مختارات اليوم</div>
@@ -111,6 +119,8 @@
       @if($hijri)<div class="mast-hijri">{{ $hijri }}</div>@endif
     </div>
   </div>
+  {{-- قاعدة صحفية مزدوجة: خط سميك ثم رفيع --}}
+  <div class="mrule"></div>
 
   <div class="wrap">
 
@@ -197,7 +207,12 @@
   </div>
 
   <div class="foot">
-    @if(!empty($qrUrl))<div class="qr"><img src="{{ $qrUrl }}" alt="QR"></div>@endif
+    @if(!empty($qrUrl))
+    <div class="qr-wrap">
+      <div class="qr"><img src="{{ $qrUrl }}" alt="QR"></div>
+      <div class="qr-cap">{{ str_replace(['https://', 'http://'], '', url('/n/' . $issue)) }}</div>
+    </div>
+    @endif
     <div class="foot-t">
       @if(!empty($qrUrl))<div class="foot-scan">امسح للتفاصيل والروابط</div><div class="foot-brand">نشرة لبنان اليومية</div>@endif
       @if(!empty($quote))<div class="foot-quote">« {{ $quote }} »</div>@endif
