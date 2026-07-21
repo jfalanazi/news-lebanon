@@ -1,5 +1,6 @@
 <?php
 namespace App\Filament\Resources\Editions\Tables;
+use App\Support\ArabicDate;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -20,7 +21,7 @@ class EditionsTable
                     ->sortable(),
                 TextColumn::make('edition_date')
                     ->label('التاريخ')
-                    ->date()
+                    ->formatStateUsing(fn ($state): string => ArabicDate::full($state))
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('الحالة')

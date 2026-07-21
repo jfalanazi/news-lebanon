@@ -6,7 +6,7 @@ use App\Models\Edition;
 use App\Models\NewsCandidate;
 use App\Models\NewsItem;
 use App\Models\Source;
-use Carbon\Carbon;
+use App\Support\ArabicDate;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -28,7 +28,7 @@ class NashraStats extends StatsOverviewWidget
         return [
             Stat::make('آخر عدد', $latest ? '#' . $latest->issue_number : '—')
                 ->description($latest
-                    ? (($latest->status === 'published' ? 'منشور' : 'مسودة') . ' · ' . Carbon::parse($latest->edition_date)->format('Y/m/d'))
+                    ? (($latest->status === 'published' ? 'منشور' : 'مسودة') . ' · ' . ArabicDate::short($latest->edition_date))
                     : 'لا يوجد أعداد بعد')
                 ->descriptionIcon('heroicon-m-newspaper')
                 ->color($latest && $latest->status === 'published' ? 'success' : 'gray'),
@@ -54,7 +54,7 @@ class NashraStats extends StatsOverviewWidget
                 ->color($activeSources > 0 ? 'success' : 'danger'),
 
             Stat::make('أعداد هذا الشهر', $monthEditions)
-                ->description(Carbon::now()->translatedFormat('F Y'))
+                ->description(ArabicDate::monthYear(now()))
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('gray'),
         ];

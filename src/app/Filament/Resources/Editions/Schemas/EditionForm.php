@@ -30,6 +30,8 @@ class EditionForm
                             ->required()
                             ->numeric()
                             ->default(fn () => Edition::nextIssueNumber())
+                            ->readOnly()
+                            ->helperText('يُحدَّد تلقائيًا بتسلسل الأعداد — الرقم يتبع الزمن.')
                             ->unique(ignoreRecord: true)
                             ->validationMessages([
                                 'unique' => 'رقم العدد مستخدم مسبقًا — اختر رقمًا آخر.',
