@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\AiError;
 use Illuminate\Support\Facades\Http;
 
 class AiSuggester
@@ -26,7 +27,7 @@ class AiSuggester
         ]);
 
         if (! $resp->successful()) {
-            throw new \RuntimeException('فشل الاتصال بالذكاء (' . $resp->status() . '): ' . $resp->body());
+            throw new \RuntimeException(AiError::humanize($resp->status(), $resp->body()));
         }
 
         $text = (string) $resp->json('content.0.text', '');
@@ -73,7 +74,7 @@ class AiSuggester
         ]);
 
         if (! $resp->successful()) {
-            throw new \RuntimeException('فشل الاتصال بالذكاء (' . $resp->status() . '): ' . $resp->body());
+            throw new \RuntimeException(AiError::humanize($resp->status(), $resp->body()));
         }
 
         return trim((string) $resp->json('content.0.text', ''));
