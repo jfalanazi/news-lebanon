@@ -3,9 +3,7 @@
 namespace App\Filament\Resources\Editions\Pages;
 
 use App\Filament\Resources\Editions\EditionResource;
-use App\Models\NewsCandidate;
-use App\Services\AiNewsCurator;
-use App\Services\NewsFetcher;
+use App\Services\NewsPicker;
 use App\Services\NewsletterCaption;
 use App\Services\NewsletterRenderer;
 use Filament\Actions\Action;
@@ -13,6 +11,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Str;
 
 class EditEdition extends EditRecord
 {
@@ -72,36 +71,17 @@ class EditEdition extends EditRecord
                     $edition = $this->getRecord();
 
                     try {
-                        app(NewsFetcher::class)->fetchAll();
+                        $added = app(NewsPicker::class)->fill($edition);
 
-                        $batch = NewsCandidate::where('used', false)
-                            ->where('ai_processed', false)
-                            ->latest()->take(10)->get();
-
-                        if ($batch->isNotEmpty()) {
-                            app(AiNewsCurator::class)->process($batch);
+                        if ($added > 0) {
+                            Notification::make()->title("تمت تعبئة العدد — {$added} أخبار ✨")->success()->send();
+                        } else {
+                            Notification::make()
+                                ->title('لا جديد')
+                                ->body('كل الأخبار مستخدمة أو مكررة أو لا مصادر مفعّلة.')
+                                ->warning()
+                                ->send();
                         }
-
-                        $toAdd = NewsCandidate::where('used', false)
-                            ->where('ai_processed', true)
-                            ->latest()->take(7)->get();
-
-                        $pos = (int) $edition->news()->max('position');
-                        foreach ($toAdd as $c) {
-                            $edition->news()->create([
-                                'category'     => $c->category,
-                                'url'          => $c->url,
-                                'source_name'  => $c->source_name,
-                                'title'        => $c->title,
-                                'excerpt'      => $c->excerpt,
-                                'priority'     => $c->priority ?: 'normal',
-                                'position'     => ++$pos,
-                                'ai_generated' => true,
-                            ]);
-                            $c->update(['used' => true]);
-                        }
-
-                        Notification::make()->title('تمت تعبئة العدد ✨')->success()->send();
                     } catch (\Throwable $e) {
                         Notification::make()
                             ->title('تعذّر التوليد الذكي')
@@ -184,6 +164,24 @@ class EditEdition extends EditRecord
                             ->send();
 
                         return;
+                    }
+
+                    // حارس جودة: لا نشر بتصنيف ناقص أو تجريبي
+                    $bad = $edition->news->first(fn ($n) => in_array(trim((string) $n->category), ['', 'التصنيف'], true));
+                    if ($bad) {
+                        Notification::make()
+                            ->title('تصنيف ناقص')
+                            ->body('الخبر «' . Str::limit($bad->title, 40) . '» بلا تصنيف صحيح — عدّله قبل النشر.')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+
+                    // عبارة تذييل تجريبية ← تسقط للعبارة الافتراضية من الإعدادات
+                    if (str_contains((string) $edition->quote, 'تذييل') || str_contains((string) $edition->quote, 'تذيييل')) {
+                        $edition->update(['quote' => null]);
+                        $edition->refresh()->load(['news', 'recommendations', 'events']);
                     }
 
                     // توليد الصورة دائمًا لتعكس آخر التعديلات
