@@ -18,33 +18,38 @@
 
   /* ===== الترويسة ===== */
   .mast{background:var(--ink);color:#fff;padding:36px 56px 30px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:5px solid var(--gold)}
-  .mast-title{font-family:var(--display);font-weight:900;font-size:58px;line-height:1}
+  .mast-title{font-family:var(--display);font-weight:900;font-size:64px;line-height:1}
   .mast-sub{font-weight:500;font-size:22px;color:#CFE3D2;margin-top:10px}
   .mast-l{text-align:left}
-  .mast-issue{font-weight:700;font-size:17px;color:#D9C79A;letter-spacing:2px}
+  .mast-issue{font-weight:700;font-size:17px;color:#D9C79A}
   .mast-day{font-family:var(--display);font-weight:800;font-size:36px;margin-top:8px;line-height:1}
   .mast-greg{font-weight:500;font-size:20px;color:#EAF3EC;margin-top:8px}
   .mast-hijri{font-weight:400;font-size:16px;color:#A9C6B0;margin-top:4px}
 
   /* ===== الجسم ===== */
-  .wrap{padding:32px 56px}
-  .sec{margin-bottom:30px}
-  .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:6px}
-  .sec-head h2{font-family:var(--display);font-weight:800;font-size:30px;color:var(--ink)}
+  .wrap{padding:40px 56px 32px}
+  .sec{margin-bottom:40px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:8px}
+  .sec-head h2{font-family:var(--display);font-weight:800;font-size:26px;color:var(--ink)}
   .sec-head .n{font-size:15px;color:var(--mut);font-weight:500}
 
   /* الأخبار */
-  .n-item{display:flex;gap:20px;padding:18px 0;border-bottom:1px solid var(--line)}
+  .n-item{display:flex;gap:16px;padding:24px 0;border-bottom:1px solid var(--line)}
   .n-item:last-child{border-bottom:none}
-  .n-num{flex:0 0 auto;width:42px;text-align:center;font-family:var(--display);font-weight:800;font-size:30px;color:var(--gold);padding-top:4px}
+  .n-item.b{border-right:3px solid var(--red);padding-right:16px}
+  .n-item.m{border-right:3px solid var(--amber);padding-right:16px}
+  .n-num{flex:0 0 auto;width:48px;text-align:center;font-family:var(--display);font-weight:800;font-size:28px;color:#8C7743;padding-top:2px}
   .n-body{flex:1;min-width:0}
-  .n-meta{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .n-meta{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .n-tag{font-family:var(--display);font-weight:800;font-size:14px;color:#fff;padding:2px 12px;border-radius:4px}
   .n-tag.b{background:var(--red)} .n-tag.m{background:var(--amber)}
   .n-cat{font-weight:600;font-size:17px;color:var(--gold);overflow-wrap:anywhere}
-  .n-title{font-weight:700;font-size:33px;line-height:1.28;color:var(--text);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .n-item.b .n-num{color:var(--red)} .n-item.b .n-title{color:#7A1F19}
-  .n-excerpt{font-weight:400;font-size:22px;line-height:1.45;color:var(--mut);margin-top:6px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .n-title{font-weight:700;font-size:30px;line-height:1.4;color:var(--text);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .n-item.b .n-num{color:var(--red)}
+  .n-excerpt{font-weight:400;font-size:20px;line-height:1.55;color:var(--mut);margin-top:8px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  .n-more{padding:16px 0 0;font-weight:600;font-size:18px;color:var(--mut)}
+  .w-hi,.w-lo,.w-day .t,.p-time,.n-num,.mast-issue{font-variant-numeric:tabular-nums}
 
   /* عمودان */
   .two{display:grid;grid-template-columns:1fr 1fr;gap:44px}
@@ -112,7 +117,8 @@
     {{-- الأخبار --}}
     <div class="sec">
       <div class="sec-head"><h2>أهم الأخبار</h2></div>
-      @foreach($news as $i => $n)
+      @php $newsShow = collect($news)->take(6); $extraNews = max(count($news) - 6, 0); @endphp
+      @foreach($newsShow as $i => $n)
         @php $pr = $n['priority'] ?? 'normal'; $cls = $pr==='breaking'?'b':($pr==='important'?'m':''); @endphp
         <div class="n-item {{ $cls }}">
           <div class="n-num">{{ $i + 1 }}</div>
@@ -127,6 +133,7 @@
           </div>
         </div>
       @endforeach
+      @if($extraNews > 0)<div class="n-more">+ {{ $extraNews }} أخبار إضافية على صفحة العدد — امسح الباركود</div>@endif
     </div>
 
     {{-- الطقس + الصلاة --}}

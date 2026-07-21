@@ -15,7 +15,7 @@
 <meta property="og:image" content="{{ $ogImg }}">
 <meta property="og:url" content="{{ url('/n/' . $edition->issue_number) }}">
 <meta property="og:site_name" content="نشرة لبنان">
-<meta property="og:locale" content="ar_AR">
+<meta property="og:locale" content="ar_LB">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="نشرة لبنان — العدد {{ $edition->issue_number }}">
 <meta name="twitter:description" content="{{ $ogDesc }}">
@@ -34,6 +34,9 @@
   .header{background:var(--ink);color:#fff;padding:22px 20px;text-align:center;position:sticky;top:0;z-index:5}
   .h-title{font-family:"Tajawal",sans-serif;font-weight:800;font-size:26px}
   .h-sub{font-weight:500;font-size:15px;color:#CFE3D2;margin-top:4px}
+  .strip{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 0;scrollbar-width:none}
+  .strip::-webkit-scrollbar{display:none}
+  .s-chip{flex:0 0 auto;background:#FDFBF3;border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--cedar);white-space:nowrap}
   .sec{padding:18px 16px 4px}
   .sec-title{font-family:"Tajawal",sans-serif;font-weight:800;font-size:20px;color:var(--cedar);
     display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -56,7 +59,7 @@
   .n-more[open] summary::before{content:"▴ ";}
   .n-bodyfull{font-size:14px;color:var(--text);margin-top:8px;line-height:1.85;white-space:pre-line}
   .n-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-  .src-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:#F1EAD5;color:var(--cedarDeep);padding:4px 12px;border-radius:20px;border:1px solid var(--goldSoft)}
+  .src-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;background:#F1EAD5;color:var(--cedar);padding:4px 12px;border-radius:20px;border:1px solid var(--goldSoft)}
   .chip{display:inline-block;font-size:12px;font-weight:600;background:#EBE2C9;color:var(--cedar);padding:2px 10px;border-radius:12px;margin-top:6px}
   .foot{text-align:center;color:var(--mut);font-size:14px;padding:22px 24px 0;line-height:1.9}
   .foot b{color:var(--cedar)}
@@ -74,6 +77,19 @@
     <div class="h-title">🇱🇧 نشرة لبنان — العدد {{ $edition->issue_number }}</div>
     <div class="h-sub">{{ $date->translatedFormat('l') }} · {{ $date->format('Y/m/d') }}</div>
   </div>
+
+  {{-- شريط اليوم: الطقس ومواقيت الصلاة من لقطة العدد --}}
+  @php $w = is_array($edition->weather) ? $edition->weather : null; $pr = is_array($edition->prayers) ? $edition->prayers : null; @endphp
+  @if($w || $pr)
+  <div class="strip">
+    @if($w)<span class="s-chip">⛅ {{ $w['cond'] ?? 'الطقس' }} · {{ $w['hi'] ?? '—' }}° / {{ $w['lo'] ?? '—' }}°</span>@endif
+    @if($pr)
+      @foreach(['الفجر','الظهر','العصر','المغرب','العشاء'] as $pn)
+        @if(!empty($pr[$pn]))<span class="s-chip">{{ $pn }} {{ $pr[$pn] }}</span>@endif
+      @endforeach
+    @endif
+  </div>
+  @endif
 
   @php
     $pageUrl = url('/n/' . $edition->issue_number);
@@ -145,8 +161,9 @@
     @endforeach
   @endif
 
-  @if($edition->quote)
-    <div class="foot">« {{ $edition->quote }} »<br><b>نشرة لبنان اليومية</b></div>
+  @php $footQuote = $edition->quote ?: \App\Models\Setting::get('default_quote', ''); @endphp
+  @if($footQuote)
+    <div class="foot">« {{ $footQuote }} »<br><b>نشرة لبنان اليومية</b></div>
   @else
     <div class="foot"><b>نشرة لبنان اليومية</b></div>
   @endif
